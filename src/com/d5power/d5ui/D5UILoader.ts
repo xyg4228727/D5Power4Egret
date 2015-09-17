@@ -1,6 +1,3 @@
-/**
- * Created by Administrator on 2015/9/1.
- */
 //////////////////////////////////////////////////////////////////////////////////////
 //
 //  Copyright (c) 2014-2015, MicroGame Technology Inc.
@@ -29,6 +26,9 @@
 //  EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //////////////////////////////////////////////////////////////////////////////////////
+/**
+ * Created by Administrator on 2015/9/1.
+ */
 module d5power {
     export class D5UILoader extends egret.Sprite implements IUserInfoDisplayer,IProBindingContainer {
         public  _realWidth:number=0;

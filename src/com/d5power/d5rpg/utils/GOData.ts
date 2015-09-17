@@ -1,3 +1,31 @@
+//////////////////////////////////////////////////////////////////////////////////////
+//
+//  Copyright (c) 2014-2015, MicroGame Technology Inc.
+//  All rights reserved.
+//  Redistribution and use in source and binary forms, with or without
+//  modification, are permitted provided that the following conditions are met:
+//
+//     * Redistributions of source code must retain the above copyright
+//       notice, this list of conditions and the following disclaimer.
+//     * Redistributions in binary form must reproduce the above copyright
+//       notice, this list of conditions and the following disclaimer in the
+//       documentation and/or other materials provided with the distribution.
+//     * Neither the name of the Egret nor the
+//       names of its contributors may be used to endorse or promote products
+//       derived from this software without specific prior written permission.
+//
+//  THIS SOFTWARE IS PROVIDED BY EGRET AND CONTRIBUTORS "AS IS" AND ANY EXPRESS
+//  OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+//  OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
+//  IN NO EVENT SHALL EGRET AND CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+//  INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+//  LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;LOSS OF USE, DATA,
+//  OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+//  LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+//  NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
+//  EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+//
+//////////////////////////////////////////////////////////////////////////////////////
 module d5power {
     export class GOData implements IGD {
 
@@ -63,12 +91,42 @@ module d5power {
         private _fighter:IFighter;
 
         /**
+        * 是否处于重力状态
+        */ 
+        public inG: boolean = true;
+        /**
+        * 重心 X 加速度
+        */
+        public speedX:number = 0;
+        /**
+        * 重力 Y加速度
+        */
+        public speedY:number = 0;
+
+//        public runGravity(): void
+//        {
+//            var p0:egret.Point = D5Game.me.map.Postion2Tile(this.posX,this.posY+this._gravitySpeed);
+//            // 上升阶段和可通过路点均可任意调整坐标
+//            if(this._gravitySpeed<0 || !D5Game.me.map.getRoadPass(p0.x,p0.y))
+//            {
+//                this._target.setPos(this._target.posX,this._target.posY+this._gravitySpeed);
+//                this._gravitySpeed += CharacterController.GRAVITY;
+//            }else{
+//                this._jumpTime = 0;
+//                this._gravitySpeed = 0;
+//                this._target.setPos(this._target.posX,p0.y*D5Game.me.map.roadHeight);
+//                }
+//        }
+        
+        
+        /**
          * 排序调整
          */
         public _zOrderF:number = 0;
 
         public constructor() {
             this._pos = new egret.Point();
+            
         }
 
         public loadMission():void
@@ -100,15 +158,16 @@ module d5power {
             }
         }
 
-        public run(gravity:boolean):void {
+        public run():void {
 
             var targetx:number;
             var targety:number;
             var maxX:number = D5Game.me.map.width;
             var maxY:number = D5Game.me.map.height;
-
-            if(gravity && this._controller) this._controller.gravityRun();
-
+            
+            this._pos.x += this.speedX;
+            this._pos.y += this.speedY;
+            
             if(D5Game.me.camera.focus==this){
                 targetx = this._pos.x<(D5Game.me.screenWidth>>1) ? this._pos.x : (D5Game.me.screenWidth>>1);
                 targety = this._pos.y<(D5Game.me.screenHeight>>1) ? this._pos.y : (D5Game.me.screenHeight>>1);
@@ -120,11 +179,11 @@ module d5power {
                 targetx = target.x;
                 targety = target.y;
             }
-
             if(this._displayer) {
                 this._displayer.x = parseInt(<string><any>targetx);
                 this._displayer.y = parseInt(<string><any>targety);
             }
+            
 
             if(this._controller) this._controller.run();
         }

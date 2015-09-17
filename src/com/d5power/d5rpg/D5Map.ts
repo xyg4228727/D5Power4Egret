@@ -1,3 +1,31 @@
+//////////////////////////////////////////////////////////////////////////////////////
+//
+//  Copyright (c) 2014-2015, MicroGame Technology Inc.
+//  All rights reserved.
+//  Redistribution and use in source and binary forms, with or without
+//  modification, are permitted provided that the following conditions are met:
+//
+//     * Redistributions of source code must retain the above copyright
+//       notice, this list of conditions and the following disclaimer.
+//     * Redistributions in binary form must reproduce the above copyright
+//       notice, this list of conditions and the following disclaimer in the
+//       documentation and/or other materials provided with the distribution.
+//     * Neither the name of the Egret nor the
+//       names of its contributors may be used to endorse or promote products
+//       derived from this software without specific prior written permission.
+//
+//  THIS SOFTWARE IS PROVIDED BY EGRET AND CONTRIBUTORS "AS IS" AND ANY EXPRESS
+//  OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+//  OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
+//  IN NO EVENT SHALL EGRET AND CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+//  INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+//  LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;LOSS OF USE, DATA,
+//  OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+//  LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+//  NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
+//  EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+//
+//////////////////////////////////////////////////////////////////////////////////////
 module d5power {
     /**
      * 2.5D透视地图
@@ -163,9 +191,12 @@ module d5power {
             return this._roadH;
         }
 
-        public runPos(dataList:Array<IGD>,gravity:boolean=false):void
+        public runPos(dataList:Array<IGD>):void
         {
-            for (var i:number = dataList.length - 1; i >= 0; i--) dataList[i].deleting ? D5Game.me.removeObject(i) : dataList[i].run(gravity);
+            for (var i:number = dataList.length - 1; i >= 0; i--) 
+            {
+                dataList[i].deleting ?  D5Game.me.removeObject(i):dataList[i].run();
+            }
         }
 
         public render(flush:boolean = false):void {
@@ -186,21 +217,6 @@ module d5power {
                 var zero_y:number = D5Game.me.camera.zeroY % this._tileH;
                 this._dbuffer.x = -zero_x;
                 this._dbuffer.y = -zero_y;
-
-                //var i:number=this._dbuffer.numChildren-1;
-                //var loop:egret.Bitmap;
-                //
-                //for(i;i>=0;i--)
-                //{
-                //    loop = <egret.Bitmap><any>this._dbuffer.getChildAt(i);
-                //    this._dbuffer.localToGlobal(loop.x,loop.y,this._tempPoint);
-                //    if(this._tempPoint.x<=-this.tileWidth*2 || this._tempPoint.y<=-this.tileHeight*2 || this._tempPoint.x>D5Game.me.screenWidth+this.tileWidth || this._tempPoint.y>D5Game.me.screenHeight+this.tileWidth)
-                //    {
-                //        this._dbuffer.removeChild(loop);
-                //        loop.texture=null;
-                //        D5Map.back2pool(loop);
-                //    }
-                //}
             }
         }
 
@@ -245,7 +261,7 @@ module d5power {
         public isInAlphaArea(px:number,py:number):boolean
         {
             var tile: egret.Point = this.Postion2Tile(px,py);
-            return this._alphaArr[tile.y][tile.x]==D5Map.BIN_ALPHA_VALUE;
+            return this._alphaArr[tile.y] && this._alphaArr[tile.y][tile.x]==D5Map.BIN_ALPHA_VALUE;
         }
 
         public getPointAround(center:egret.Point,from:egret.Point,r:number):egret.Point
@@ -721,11 +737,15 @@ module d5power {
         private _farType: number; //远景填充方式
         private _farBuff: egret.DisplayObjectContainer; //远景容器
         private _farDisplayer: egret.Bitmap;
-        public setupFar(name:string,type:number,container:egret.DisplayObjectContainer):void
+        private _far_x: number;//远景图 偏移x
+        private _far_y: number;//远景图 偏移y
+        public setupFar(name:string,type:number,container:egret.DisplayObjectContainer,far_x:number,far_y:number):void
         {
             this._farName = name;
             this._farType = type;
             this._farBuff = container;
+            this._far_x = far_x;
+            this._far_y = far_y;
             RES.getResByUrl(D5Game.RES_SERVER + D5Game.ASSET_PATH + '/tiles/' + this._mapid +'/'+ name, this.onFarLoaded, this);
         }
         
@@ -767,6 +787,9 @@ module d5power {
                 }
                 this._farDisplayer.width = f_w;
                 this._farDisplayer.height = f_h;
+                this._farDisplayer.x = this._far_x;
+                this._farDisplayer.y = this._far_y;
+                
                 this._farBuff.cacheAsBitmap = true;
             }
         }
@@ -782,5 +805,26 @@ module d5power {
                 this._farBuff.y = -D5Game.me.camera.zeroY;   
             }
         }
+        /**
+        * 设置重力感应
+        * @param  b   boolean 
+        */ 
+        private _deviceorientation: boolean = false;
+        public  setDeviceorientation(b:boolean):void
+        {
+            this._deviceorientation = b;  
+            b ? window.addEventListener("deviceorientation",this.ondeviceorientation):window.removeEventListener("deviceorientation",this.ondeviceorientation);
+        }
+        
+        public get Deviceorientation():boolean
+        {
+            return this._deviceorientation;
+        }
+        
+        private ondeviceorientation(e:Event):void
+        {
+//            console.log(Math.floor(e.beta), Math.floor(e.gamma), Math.floor(e.alpha));
+        }
+        
     }
 }

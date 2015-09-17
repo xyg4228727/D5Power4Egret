@@ -207,7 +207,7 @@ module d5power
             switch(parseInt(<string><any>data.Direction))
             {
                 case 1:
-                    this._totalDirection = 2;
+                    this._totalDirection = 1;
                     break;
                 case 5:
                     this._totalDirection = 8;
@@ -239,7 +239,10 @@ module d5power
                         {
                             console.log("[D5SpriteSheepINIT] can not find uv config line:",l,",frame:",i,"===========================");
                         }else {
-                            this._sheet.createTexture('frame' + l + '_' + i, i * data.FrameWidth, l * data.FrameHeight, uv.width, uv.height,l<5 ? uv.offX : -uv.width-uv.offX, uv.offY);
+                            if(uv.offY == -uv.height) uv.offY += 0.01;
+                            //this._sheet.createTexture('frame' + l + '_' + i, i * data.FrameWidth, l * data.FrameHeight, uv.width, uv.height,l<5 ? uv.offX : -uv.width-uv.offX, uv.offY);
+                            this._sheet.createTexture('frame' + l + '_' + i, i * data.FrameWidth+uv.x, l * data.FrameHeight+uv.y, uv.width, uv.height,l<5 ? uv.offX : -uv.width-uv.offX, uv.offY);
+                            //this._sheet.createTexture('frame' + l + '_' + i, i * data.FrameWidth, l * data.FrameHeight, uv.width, uv.height,l<5 ? uv.offX : -uv.width-uv.offX, uv.offY);
                         }
                     }
                 }

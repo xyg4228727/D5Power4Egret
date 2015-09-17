@@ -1,14 +1,50 @@
-///<reference path="core/IGD.ts"/>
+//////////////////////////////////////////////////////////////////////////////////////
+//
+//  Copyright (c) 2014-2015, MicroGame Technology Inc.
+//  All rights reserved.
+//  Redistribution and use in source and binary forms, with or without
+//  modification, are permitted provided that the following conditions are met:
+//
+//     * Redistributions of source code must retain the above copyright
+//       notice, this list of conditions and the following disclaimer.
+//     * Redistributions in binary form must reproduce the above copyright
+//       notice, this list of conditions and the following disclaimer in the
+//       documentation and/or other materials provided with the distribution.
+//     * Neither the name of the Egret nor the
+//       names of its contributors may be used to endorse or promote products
+//       derived from this software without specific prior written permission.
+//
+//  THIS SOFTWARE IS PROVIDED BY EGRET AND CONTRIBUTORS "AS IS" AND ANY EXPRESS
+//  OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+//  OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
+//  IN NO EVENT SHALL EGRET AND CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+//  INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+//  LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;LOSS OF USE, DATA,
+//  OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+//  LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+//  NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
+//  EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+//
+//////////////////////////////////////////////////////////////////////////////////////
+
 module d5power {
     export class D5Game extends egret.DisplayObjectContainer {
+        /**
+         * 游戏中的每“米”对应程序中的像素值
+         */ 
         public static MI:number = 50;
+        /**
+         * 游戏资源服务器，留空则为本地素材相对路径
+         */ 
         public static RES_SERVER:string = '';
+        /**
+         * 游戏资源的保存目录
+         */ 
         public static ASSET_PATH:string = 'resource/assets';
-
+        
         private _dataList:Array<IGD>;
         protected _screenList:Array<IGD>;
-        private _gravity:boolean=false;
-
+        private _g: D5Gravity;
         private _characterData:CharacterData;
         private _missionDispatcher:IMissionDispatcher;
 
@@ -44,12 +80,13 @@ module d5power {
         private _dialog:d5power.DialogBox;
         private _itemopt: d5power.ItemOpt;
 
+
 //        private _dialog:IDialog;
         /**
          * 当前的渲染进度
          */
         private _nowRend:number;
-
+        
         private _runAction:any;
 
         private static _me:D5Game;
@@ -58,6 +95,7 @@ module d5power {
         public static get me():D5Game {
             return D5Game._me;
         }
+        
         public runScript(url:string):void
         {
 
@@ -97,13 +135,36 @@ module d5power {
             this._screenList = [];
 
             this.addEventListener(egret.Event.ADDED_TO_STAGE, this.install, this);
+            /**
+             * 重力跳跃测试
+             */ 
+            var that = this;
+            document.addEventListener("keydown",function(event){
+
+                        if(that._g &&event.keyCode == 32 ) 
+                        {
+                            that.player.inG = true;
+                            that.player.speedY = -20;
+                        }
+                    }
+              )
         }
 
-        public openGravity(g:number=0.18,jumppower:number=5):void
+        public openGravity():void
         {
-            this._gravity = true;
-            CharacterController.GRAVITY=g;
-            CharacterController.JUMP_POWER = jumppower;
+            if(!this._g)
+            {
+                this._g = new D5Gravity();
+                this._g.initGravity(0.8);
+            }
+        }
+        
+        /**
+         * 重力感应控制器 
+         */ 
+        public get g():D5Gravity
+        {
+            return this._g;
         }
 
         public setCharacterData(data:CharacterData)
@@ -112,7 +173,7 @@ module d5power {
             {
                 return;
             }
-
+            
             this._characterData = data;
         }
 
@@ -136,6 +197,22 @@ module d5power {
         {
 
         }
+        public showPackage(): void
+        {
+
+        }
+        public showMission(): void
+        {
+
+        }
+        public showSkill(b:d5power.D5MirrorBox = null): void
+        {
+
+        }
+        public showScript(): void
+        {
+
+        }
 
 //        public setDialogUI(ui:IDialog):void
 //        {
@@ -146,86 +223,14 @@ module d5power {
             new d5power.Notice(D5Game.me.stage,msg);
         }
 
-        private _package:d5power.userPackage = null;
-        public showPackage():void
-        {
-            if(!this.contains(this._package)) {
-                this._package = new d5power.userPackage;
-                this.addChild(this._package);
-            } else
-            {
-                this._package.onClose(null); 
-            }
-        }
-
-        /**
-         * 显示任务面板
-         */
-        private _missionWin:d5power.MissionWin = null;
-        public showMission():void
-        {
-            if(!this.contains(this._missionWin)) {
-                this._missionWin = new d5power.MissionWin;
-                this.addChild(this._missionWin);
-            } else {
-                this._missionWin.dispose();
-            }
-        }
-        
-        /**
-        *显示角色面板
-        */ 
-        private _roleWin: d5power.RoleWin = null;
-        public showRole(): void 
-        {
-            if(!this.contains(this._roleWin)) {
-                this._roleWin = new d5power.RoleWin;
-                this.addChild(this._roleWin);
-            } else
-            {
-                this._roleWin.dispose(); 
-            }
-        }
-        /**
-         *显示技能面板
-         */
-        private _skillWin: d5power.SkillWin = null;
-        public showSkill(b:D5MirrorBox = null): void 
-        {
-            if(!this.contains(this._skillWin)) {
-                this._skillWin = new d5power.SkillWin(b);
-                this.addChild(this._skillWin);
-           } else
-            {
-                this._skillWin.dispose(); 
-                this._skillWin = null;
-            }
-        }
-        /**
-         *显示脚本面板
-         */
-        private _scriptWin: d5power.ScriptEditor = null;
-        public showScript(): void
-        {
-            if(!this.contains(this._skillWin)) {
-                this._scriptWin = new d5power.ScriptEditor();
-                this.addChild(this._scriptWin);
-            } else
-            {
-                this._scriptWin.dispose();
-                this._scriptWin = null;
-            }
-        }
-        
-
         public collectionWithNPC(igd:IGD):void
         {
-            if(this._container_bottom.contains(this._pickup))return;
+            if(this.contains(this._pickup))return;
             this._pickup = new d5power.ProgBar(this.pickupItem,parseInt(igd.job_number)<=0 ? RPGI.ConfigCenter.me.pickupTime : parseInt(igd.job_number),this);
             this._pickup.data = igd;
             this._pickup.x = (this.stage.stageWidth-this._pickup.setWidth())>>1;
             this._pickup.y = this.stage.stageHeight*0.7;
-            this._container_bottom.addChild(this._pickup);
+            this.addChild(this._pickup);
         }
         private pickupItem():void
         {
@@ -295,8 +300,8 @@ module d5power {
                 this._dialog = new d5power.MissionDialog(this.stage,headurl,igd.nickname,mdata.npc_said,igd.missionIndex);
                 this.addChild(this._dialog);
                 this._dialog.setNpc(igd);
-                this._dialog.x = (this.stage.stageWidth - this._dialog.setWidth())/2;
-                this._dialog.y = (this.stage.stageHeight - this._dialog.setHeight())/2+100;
+                //this._dialog.x = (this.stage.stageWidth - this._dialog.setWidth())/2;
+                //this._dialog.y = (this.stage.stageHeight - this._dialog.setHeight())/2;
             }else
             {
                 this.dialog(headurl,igd.nickname,igd.say);
@@ -315,8 +320,8 @@ module d5power {
                 this._dialog.configDialog(url,nickname,say);
             }
             this.addChild(this._dialog);
-            this._dialog.x = (this.stage.stageWidth - this._dialog.setWidth())/2;
-            this._dialog.y = (this.stage.stageHeight - this._dialog.setHeight())/2+100;
+            //this._dialog.x = (this.stage.stageWidth - this._dialog.setWidth())/2;
+            //this._dialog.y = (this.stage.stageHeight - this._dialog.setHeight())/2;
         }
 
         public closeDialog():void
@@ -328,196 +333,196 @@ module d5power {
                 this._dialog = null;
             }
         }
-
-        /**
-         * 绘制一个特定颜色的背景
-         */
-
-        private _storyBackGround:egret.Shape;
-        private _storyBGColor:number;
-        public openBg(color:number = 0):void
-        {
-            this._storyBGColor = color;
-            if(this._storyBackGround==null)
-            {
-                this._storyBackGround = new egret.Shape();
-                this.addChild(this._storyBackGround);
-            }else{
-                this._storyBackGround.graphics.clear();
-            }
-            this._storyBackGround.graphics.beginFill(color,1);
-            this._storyBackGround.graphics.drawRect(0,0,this.stage.stageWidth,this.stage.stageHeight);
-            this._storyBackGround.graphics.endFill();
-            this._storyBackGround.alpha = 0;
-            egret.Tween.get(this._storyBackGround, {
-                loop: false,//设置循环播放
-                onChange: null,//设置更新函数
-                onChangeObj: this//更新函数作用域
-            })
-                .to({alpha: 1}, 1000)//设置2000毫秒内 rotation 属性变为360
-        }
-
-        /**
-         * 绘制好的特定背景渐隐
-         */
-        public closeBg():void
-        {
-            if(this._storyBackGround)
-            {
-                egret.Tween.get(this._storyBackGround, {
-                    loop: false,//设置循环播放
-                    onChange: null,//设置更新函数
-                    onChangeObj: this//更新函数作用域
-                })
-                    .to({alpha: 0}, 500)//设置2000毫秒内 rotation 属性变为360
-                    .call(this.cleanBgFunction, this);//设置回调函数及作用域，可用于侦听动画完成
-            }
-        }
-
-        private cleanBgFunction():void
-        {
-            if(this._storyBackGround)
-            {
-                this._storyBackGround.graphics.clear();
-                this._storyBackGround.parent.removeChild(this._storyBackGround);
-                this._storyBackGround=null;
-            }
-        }
-        private _tim:egret.Timer;
-        private _num:number = 0;
-        private h:number;
-        /**
-         * 打开电影模式
-         */
-        private _movieMask:egret.Sprite;
-        private _movieMashSize:number;
-        public openMovieMode(size:number):void
-        {
-            this._movieMashSize = size;
-            if(this._movieMask)
-            {
-                this.cleanMovieMask();
-            }
-
-            this._movieMask = new egret.Sprite();
-            this.addChild(this._movieMask);
-            this.h = this.stage.stageHeight * this._movieMashSize;
-            for(var i:number=0;i< 2;i++)
-            {
-                var shape:egret.Shape = new egret.Shape();
-                shape.graphics.beginFill(0x000000);
-                shape.graphics.drawRect(0,0,this.stage.stageWidth,this.h);
-                shape.graphics.endFill();
-                this._movieMask.addChild(shape);
-            }
-
-            this._movieMask.getChildAt(0).y = this.h * -1;
-            this._movieMask.getChildAt(1).y = this.stage.stageHeight - this.h;
-
-            if(this._tim)
-            {
-                this._tim.stop();
-                this._tim.removeEventListener(egret.TimerEvent.TIMER,this.moveMc,this);
-                this._tim = null;
-            }
-            this._tim = new egret.Timer(10);
-            this._tim.addEventListener(egret.TimerEvent.TIMER,this.moveMc,this);
-            this._tim.start();
-        }
-
-        private moveMc(evt:egret.TimerEvent):void
-        {
-            this._num++;
-            this._movieMask.getChildAt(0).y += (this.h / 100);
-            this._movieMask.getChildAt(1).y = this.stage.stageHeight - (this._num - 1) * (this.h / 100);
-            if(this._num >= 101)
-            {
-                this._tim.stop();
-                this._tim.removeEventListener(egret.TimerEvent.TIMER,this.moveMc,this);
-                this._tim = null;
-                this._num = 0;
-            }
-        }
-
-        /**
-         * 关闭电影模式
-         */
-        public cleanMovieMask():void
-        {
-            if(this._movieMask)
-            {
-                for(var j:number=1;j >= 0;j--)
-                {
-                    var shape:egret.Shape = <egret.Shape>this._movieMask.getChildAt(j);
-                    shape.graphics.clear();
-                    this._movieMask.removeChild(shape);
-                    shape=null;
-                }
-
-                this._movieMask.parent.removeChild(this._movieMask);
-                this._movieMask=null;
-            }
-        }
-        /**
-         * 播放字幕
-         * @param	content		字幕内容
-         * @param	place		出现位置。目前默认为0，底部出现
-         * @param	posx		特定位置出现，与place冲突，优先选择特定位置
-         * @param	posy		特定位置出现，与place冲突，优先选择特定位置
-         */
-        private _showFontTime:egret.Timer;
-        private _storyFont:D5Text;
-        public showFont(content:String,place:number=0,posx:number=0,posy:number=0):void
-        {
-            this.cleanFont();
-            this._storyFont = new D5Text();
-            this.addChild(this._storyFont);
-            this._storyFont.setTextColor(0x9F9265);
-            this._storyFont.setFontSize(24);
-            this._storyFont.setFontBold(true);
-            this._storyFont.setWrapFlg(1);
-            this._storyFont.height = 30;
-            this._storyFont.width = this.stage.stageWidth - 60;
-            if(posx!=0 || posy!=0)
-            {
-                this._storyFont.x = posx;
-                this._storyFont.y = posy;
-            }else{
-                this._storyFont.x = 30;
-                this._storyFont.y = this.stage.stageHeight - 60;
-            }
-
-            this._showFontTime = new egret.Timer(20);
-            this._showFontTime.addEventListener(egret.TimerEvent.TIMER,timerIng,this);
-            this._showFontTime.start();
-            var index:number = 0;
-            function timerIng(evt:egret.TimerEvent):void
-            {
-                this._storyFont.setText(content.substring(0,index));
-                if(index>=content.length)
-                {
-                    this._showFontTime.stop();
-                    this._showFontTime.removeEventListener(egret.TimerEvent.TIMER,timerIng,this);
-                }
-
-                index++;
-            }
-        }
-
-        public cleanFont():void
-        {
-            if(this._storyFont)
-            {
-                this._storyFont.parent.removeChild(this._storyFont);
-                this._storyFont=null;
-            }
-
-            if(this._showFontTime)
-            {
-                this._showFontTime.stop();
-                this._showFontTime=null;
-            }
-        }
+        //
+        ///**
+        // * 绘制一个特定颜色的背景
+        // */
+        //
+        //private _storyBackGround:egret.Shape;
+        //private _storyBGColor:number;
+        //public openBg(color:number = 0):void
+        //{
+        //    this._storyBGColor = color;
+        //    if(this._storyBackGround==null)
+        //    {
+        //        this._storyBackGround = new egret.Shape();
+        //        this.addChild(this._storyBackGround);
+        //    }else{
+        //        this._storyBackGround.graphics.clear();
+        //    }
+        //    this._storyBackGround.graphics.beginFill(color,1);
+        //    this._storyBackGround.graphics.drawRect(0,0,this.stage.stageWidth,this.stage.stageHeight);
+        //    this._storyBackGround.graphics.endFill();
+        //    this._storyBackGround.alpha = 0;
+        //    egret.Tween.get(this._storyBackGround, {
+        //        loop: false,//设置循环播放
+        //        onChange: null,//设置更新函数
+        //        onChangeObj: this//更新函数作用域
+        //    })
+        //        .to({alpha: 1}, 1000)//设置2000毫秒内 rotation 属性变为360
+        //}
+        //
+        ///**
+        // * 绘制好的特定背景渐隐
+        // */
+        //public closeBg():void
+        //{
+        //    if(this._storyBackGround)
+        //    {
+        //        egret.Tween.get(this._storyBackGround, {
+        //            loop: false,//设置循环播放
+        //            onChange: null,//设置更新函数
+        //            onChangeObj: this//更新函数作用域
+        //        })
+        //            .to({alpha: 0}, 500)//设置2000毫秒内 rotation 属性变为360
+        //            .call(this.cleanBgFunction, this);//设置回调函数及作用域，可用于侦听动画完成
+        //    }
+        //}
+        //
+        //private cleanBgFunction():void
+        //{
+        //    if(this._storyBackGround)
+        //    {
+        //        this._storyBackGround.graphics.clear();
+        //        this._storyBackGround.parent.removeChild(this._storyBackGround);
+        //        this._storyBackGround=null;
+        //    }
+        //}
+        //private _tim:egret.Timer;
+        //private _num:number = 0;
+        //private h:number;
+        ///**
+        // * 打开电影模式
+        // */
+        //private _movieMask:egret.Sprite;
+        //private _movieMashSize:number;
+        //public openMovieMode(size:number):void
+        //{
+        //    this._movieMashSize = size;
+        //    if(this._movieMask)
+        //    {
+        //        this.cleanMovieMask();
+        //    }
+        //
+        //    this._movieMask = new egret.Sprite();
+        //    this.addChild(this._movieMask);
+        //    this.h = this.stage.stageHeight * this._movieMashSize;
+        //    for(var i:number=0;i< 2;i++)
+        //    {
+        //        var shape:egret.Shape = new egret.Shape();
+        //        shape.graphics.beginFill(0x000000);
+        //        shape.graphics.drawRect(0,0,this.stage.stageWidth,this.h);
+        //        shape.graphics.endFill();
+        //        this._movieMask.addChild(shape);
+        //    }
+        //
+        //    this._movieMask.getChildAt(0).y = this.h * -1;
+        //    this._movieMask.getChildAt(1).y = this.stage.stageHeight - this.h;
+        //
+        //    if(this._tim)
+        //    {
+        //        this._tim.stop();
+        //        this._tim.removeEventListener(egret.TimerEvent.TIMER,this.moveMc,this);
+        //        this._tim = null;
+        //    }
+        //    this._tim = new egret.Timer(10);
+        //    this._tim.addEventListener(egret.TimerEvent.TIMER,this.moveMc,this);
+        //    this._tim.start();
+        //}
+        //
+        //private moveMc(evt:egret.TimerEvent):void
+        //{
+        //    this._num++;
+        //    this._movieMask.getChildAt(0).y += (this.h / 100);
+        //    this._movieMask.getChildAt(1).y = this.stage.stageHeight - (this._num - 1) * (this.h / 100);
+        //    if(this._num >= 101)
+        //    {
+        //        this._tim.stop();
+        //        this._tim.removeEventListener(egret.TimerEvent.TIMER,this.moveMc,this);
+        //        this._tim = null;
+        //        this._num = 0;
+        //    }
+        //}
+        //
+        ///**
+        // * 关闭电影模式
+        // */
+        //public cleanMovieMask():void
+        //{
+        //    if(this._movieMask)
+        //    {
+        //        for(var j:number=1;j >= 0;j--)
+        //        {
+        //            var shape:egret.Shape = <egret.Shape>this._movieMask.getChildAt(j);
+        //            shape.graphics.clear();
+        //            this._movieMask.removeChild(shape);
+        //            shape=null;
+        //        }
+        //
+        //        this._movieMask.parent.removeChild(this._movieMask);
+        //        this._movieMask=null;
+        //    }
+        //}
+        ///**
+        // * 播放字幕
+        // * @param	content		字幕内容
+        // * @param	place		出现位置。目前默认为0，底部出现
+        // * @param	posx		特定位置出现，与place冲突，优先选择特定位置
+        // * @param	posy		特定位置出现，与place冲突，优先选择特定位置
+        // */
+        //private _showFontTime:egret.Timer;
+        //private _storyFont:D5Text;
+        //public showFont(content:String,place:number=0,posx:number=0,posy:number=0):void
+        //{
+        //    this.cleanFont();
+        //    this._storyFont = new D5Text();
+        //    this.addChild(this._storyFont);
+        //    this._storyFont.setTextColor(0x9F9265);
+        //    this._storyFont.setFontSize(24);
+        //    this._storyFont.setFontBold(true);
+        //    this._storyFont.setWrapFlg(1);
+        //    this._storyFont.height = 30;
+        //    this._storyFont.width = this.stage.stageWidth - 60;
+        //    if(posx!=0 || posy!=0)
+        //    {
+        //        this._storyFont.x = posx;
+        //        this._storyFont.y = posy;
+        //    }else{
+        //        this._storyFont.x = 30;
+        //        this._storyFont.y = this.stage.stageHeight - 60;
+        //    }
+        //
+        //    this._showFontTime = new egret.Timer(20);
+        //    this._showFontTime.addEventListener(egret.TimerEvent.TIMER,timerIng,this);
+        //    this._showFontTime.start();
+        //    var index:number = 0;
+        //    function timerIng(evt:egret.TimerEvent):void
+        //    {
+        //        this._storyFont.setText(content.substring(0,index));
+        //        if(index>=content.length)
+        //        {
+        //            this._showFontTime.stop();
+        //            this._showFontTime.removeEventListener(egret.TimerEvent.TIMER,timerIng,this);
+        //        }
+        //
+        //        index++;
+        //    }
+        //}
+        //
+        //public cleanFont():void
+        //{
+        //    if(this._storyFont)
+        //    {
+        //        this._storyFont.parent.removeChild(this._storyFont);
+        //        this._storyFont=null;
+        //    }
+        //
+        //    if(this._showFontTime)
+        //    {
+        //        this._showFontTime.stop();
+        //        this._showFontTime=null;
+        //    }
+        //}
 //------------------------华丽丽的分割线-----------------------------------------
 
         public get timer():number
@@ -628,6 +633,7 @@ module d5power {
                 this._screenList.push(data);
                 this._container.addChild(<egret.DisplayObject><any>data.displayer);
                 if(data.work == GOData.WORK_NPC) data.loadMission();
+                if(this._g) this._g.addObject(data);
             }
         }
 
@@ -672,6 +678,17 @@ module d5power {
 
             return data;
         }
+        public createRoad(s:string, pos:egret.Point):IGD {
+            var data:GOData = GOData.getInstance();
+            data.setRespath(D5Game.RES_SERVER + D5Game.ASSET_PATH + '/mapRes/' + s);
+            data.setDirection(Direction.Down);
+            data.setWork(GOData.WORK_DOOR);
+            if (pos != null) data.setPos(pos.x, pos.y);
+
+            this.addObject(data);
+
+            return data;
+        }
 
         /**
          * 根据配置文件进行场景的数据初始化
@@ -688,29 +705,40 @@ module d5power {
                 this.init,
                 this
             );
-            if(data.far != "")
-            {
-                var fartype: number = 0;
-                if(data.farType != "") fartype = parseInt(data.farType);
-                this._map.setupFar(data.far,fartype,this._container_far);
-            }
-            if(data.tiled != "")
-            {
-                var temp: number = 0;
-                if(data.tiledType != "") temp= parseInt(data.tiledType);
-                var layer_arr: Array<any> = new Array<any>();
-                if(data.tiledLayer != null)
-                {
-                    for(var m: number = 0,n: number = data.tiledLayer.length;m < n;m++)
-                    {
-                        var layer: any = data.tiledLayer[m];
-                        layer_arr.push(layer);
+
+            if(data.gravity == "1") this.openGravity();
+            
+            if(data.far) {
+                for(var i: number = 0;i < data.far.length;i++) {
+                    var far: any = data.far[i];
+                    if(far.far != "") {
+                        var fartype: number = 0;
+                        if(far.farType != "") fartype = parseInt(far.farType);
+                        this._map.setupFar(far.far,fartype,this._container_far,parseInt(far.farX),parseInt(far.farY));
+                        break;
                     }
                 }
-                
-                this._map.setupTiled(data.tiled,temp,layer_arr,this._container_bottom);
             }
-        
+            
+            if(data.tiled) {
+                for(var i: number = 0;i < data.tiled.length;i++) {
+                    var tiled: any = data.tiled[i];
+                    if(tiled.tiled != "") {
+                        var temp: number = 0;
+                        if(tiled.tiledType != "") temp = parseInt(tiled.tiledType);
+                        var layer_arr: Array<any> = new Array<any>();
+                        if(tiled.tiledLayer != null) {
+                            for(var m: number = 0,n: number = tiled.tiledLayer.length;m < n;m++) {
+                                var layer: any = tiled.tiledLayer[m];
+                                layer_arr.push(layer);
+                            }
+                        }
+
+                        this._map.setupTiled(tiled.tiled,temp,layer_arr,this._container_bottom);
+                        break;
+                    }
+                }
+            }
             for(var i:number = 0;i < data.monster.length;i++){
                 var monster:any = data.monster[i];
                 var conf:MonsterFlushData = new MonsterFlushData();
@@ -746,6 +774,7 @@ module d5power {
                 this.addObject(obj);
             }
         }
+        
         public flushMoster():void
         {
 
@@ -757,7 +786,7 @@ module d5power {
             this.buildPlayer();
 
             if (this._player) {
-                this._player.setPos(this._startX, this._startY);
+                this._player.setPos((<number>this._startX), (<number>this._startY));
                 if (this._player.controller) this._player.controller.setupListener();
                 this._camera.update();
             } else {
@@ -803,13 +832,15 @@ module d5power {
             this.removeEventListener(egret.Event.ENTER_FRAME, this._runAction, this);
         }
 
-        private run(e:egret.Event):void {
+        private run(e:egret.Event = null):void {
 
             this._timer = egret.getTimer();
 
             this._map.render(false);
 
-            this._map.runPos(this._dataList,this._gravity);
+            this._map.runPos(this._dataList);
+            
+            if(this._g != null) this._g.run();
 
             for(var i:number=this._screenList.length-1;i>=0;i--)
             {

@@ -1,11 +1,37 @@
+//////////////////////////////////////////////////////////////////////////////////////
+//
+//  Copyright (c) 2014-2015, MicroGame Technology Inc.
+//  All rights reserved.
+//  Redistribution and use in source and binary forms, with or without
+//  modification, are permitted provided that the following conditions are met:
+//
+//     * Redistributions of source code must retain the above copyright
+//       notice, this list of conditions and the following disclaimer.
+//     * Redistributions in binary form must reproduce the above copyright
+//       notice, this list of conditions and the following disclaimer in the
+//       documentation and/or other materials provided with the distribution.
+//     * Neither the name of the Egret nor the
+//       names of its contributors may be used to endorse or promote products
+//       derived from this software without specific prior written permission.
+//
+//  THIS SOFTWARE IS PROVIDED BY EGRET AND CONTRIBUTORS "AS IS" AND ANY EXPRESS
+//  OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+//  OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
+//  IN NO EVENT SHALL EGRET AND CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+//  INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+//  LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;LOSS OF USE, DATA,
+//  OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+//  LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+//  NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
+//  EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+//
+//////////////////////////////////////////////////////////////////////////////////////
 module d5power
 {
     export class CharacterController implements IController
     {
         public static TALK_DISTANCE:number = 200;
-        public static GRAVITY:number = 0.4;
-        public static JUMP_POWER:number = 5;
-        public static JUMP_MAX:number = 2;
+        
 
         private static _me:CharacterController;
         public static getInstance(igd:IGD):CharacterController
@@ -36,15 +62,15 @@ module d5power
             //}
         }
 
-	public pause():void
-	{
-	    this._isPause = true;
-	}
+	    public pause():void
+	    {
+	        this._isPause = true;
+	    }
 
-	public start():void
-	{
-	    this._isPause = false;
-	}
+	    public start():void
+	    {
+	        this._isPause = false;
+	    }
 
         public setupListener():void
         {
@@ -62,7 +88,7 @@ module d5power
             {
                 //console.log("[CharacterController] Running");
                 //if(this._target.action==Actions.Stop) this._target.action = Actions.Run;
-                if(this._target.action==Actions.Wait)this._target.setAction(Actions.Run);
+                if(this._target.action==Actions.Wait) this._target.setAction(Actions.Run);
 
                 this._nextTarget = this._step==this._path.length ? this._endTarget : D5Game.me.map.tile2WorldPostion(this._path[this._step][0],this._path[this._step][1]);
 
@@ -86,9 +112,7 @@ module d5power
                     yisok=true;
                     yspeed=0;
                 }
-//                var tempx: number = Math.ceil(<number>this._target.posX + xspeed);
-//                var tempy: number = Math.ceil(<number>this._target.posY + yspeed);
-//                this._target.setPos(tempx,tempy);
+
                 this._target.setPos(this._target.posX+xspeed,this._target.posY+yspeed);
                 if(xisok && yisok){
                     // 走到新的位置点 更新区块坐标
@@ -224,45 +248,44 @@ module d5power
         public walk2Target():boolean{
             //console.log("[CharacterController] into walk2target");
             // 检查目标点是否可移动
+            if(this._endTarget.x == this._target.posX && this._endTarget.y == this._target.posY)
+                return false;
             var p:egret.Point = D5Game.me.map.Postion2Tile(this._endTarget.x,this._endTarget.y).clone();
-            if(!D5Game.me.map.getRoadPass(p.x,p.y))
-            {
-                return false;
-            }
-        
-            this._path = new Array<any>();
             var p0:egret.Point = D5Game.me.map.Postion2Tile(this._target.posX,this._target.posY);
-            // 得出路径
-            var nodeArr:Array<any> = D5Game.me.map.find(p0.x,p0.y,p.x,p.y);
-            if(nodeArr==null){
-                return false;
-            }else{
-                for(var i:number=0,j:number=nodeArr.length;i<j;i++){
-                    this._path.push([nodeArr[i].x,nodeArr[i].y]);
+      
+            this._path = new Array<any>();
+            if(D5Game.me.g)
+            {
+                if(!D5Game.me.map.getRoadPass(p.x,p.y))
+                {
+                    this._path = [[p.x,p.y],[p0.x,p0.y]];
+                    this._step=1;
+                    this._target.inG = true;
+                    this._target.speedY = 3;
+                    return true;
                 }
             }
-            this._step=1;
-            // 向服务器发送同步数据
-            this.tellServerMove(this._endTarget);
-            //this._target.setAction(Actions.Run);
-            return true;
-        }
-
-        private _gravitySpeed:number=0;
-        private _jumpTime:number=0;
-        public gravityRun():void
-        {
-            var p0:egret.Point = D5Game.me.map.Postion2Tile(this._target.posX,this._target.posY+this._gravitySpeed);
-            // 上升阶段和可通过路点均可任意调整坐标
-            if(this._gravitySpeed<0 || D5Game.me.map.getRoadPass(p0.x,p0.y))
+            
+            
+            if(!D5Game.me.map.getRoadPass(p.x,p.y))
             {
-                this._target.setPos(this._target.posX,this._target.posY+this._gravitySpeed);
-                this._gravitySpeed += CharacterController.GRAVITY;
-            }else{
-                this._jumpTime = 0;
-                this._gravitySpeed = 0;
-                this._target.setPos(this._target.posX,p0.y*D5Game.me.map.roadHeight);
+                  return false;
             }
+                // 得出路径
+                var nodeArr:Array<any> = D5Game.me.map.find(p0.x,p0.y,p.x,p.y);
+                if(nodeArr==null){
+                    return false;
+                }else{
+                    for(var i:number=0,j:number=nodeArr.length;i<j;i++){
+                        this._path.push([nodeArr[i].x,nodeArr[i].y]);
+                    }
+                }
+                this._step=1;
+                // 向服务器发送同步数据
+                this.tellServerMove(this._endTarget);
+                //this._target.setAction(Actions.Run);
+                return true;
+
         }
 
         public tellServerMove(target:egret.Point):void
