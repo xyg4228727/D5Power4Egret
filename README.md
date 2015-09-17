@@ -1,6 +1,7 @@
 # D5Power4Egret
-D5Power Game Framewrok for Egret
 ================================================
+D5Power Game Framewrok for Egret
+
 最新版本:1.0.0917 alpha
 
 D5Power4Egret是一套基于Egret的开源游戏框架。主要包含D5Rpg（游戏渲染与驱动框架）和D5BitmapUI（基于纹理集的界面框架）两个部分。其中D5Rpg负责游戏的数据逻辑控制，图形渲染。D5BitmapUI负责界面的渲染与功能实现。通过D5Power游戏制作工具，游戏制作者可以方便的维护游戏内的各种基础数据，包括NPC、道具、任务、技能、职业等等。并通过插件包的形式，提供多种多样的游戏实际数据维护。
