@@ -269,22 +269,23 @@ module d5power
             
             if(!D5Game.me.map.getRoadPass(p.x,p.y))
             {
-                  return false;
+                this._target.setAction(Actions.Wait);
+                return false;
             }
-                // 得出路径
-                var nodeArr:Array<any> = D5Game.me.map.find(p0.x,p0.y,p.x,p.y);
-                if(nodeArr==null){
-                    return false;
-                }else{
-                    for(var i:number=0,j:number=nodeArr.length;i<j;i++){
-                        this._path.push([nodeArr[i].x,nodeArr[i].y]);
-                    }
+            // 得出路径
+            var nodeArr:Array<any> = D5Game.me.map.find(p0.x,p0.y,p.x,p.y);
+            if(nodeArr==null){
+                return false;
+            }else{
+                for(var i:number=0,j:number=nodeArr.length;i<j;i++){
+                    this._path.push([nodeArr[i].x,nodeArr[i].y]);
                 }
-                this._step=1;
-                // 向服务器发送同步数据
-                this.tellServerMove(this._endTarget);
-                //this._target.setAction(Actions.Run);
-                return true;
+            }
+            this._step=1;
+            // 向服务器发送同步数据
+            this.tellServerMove(this._endTarget);
+            //this._target.setAction(Actions.Run);
+            return true;
 
         }
 
