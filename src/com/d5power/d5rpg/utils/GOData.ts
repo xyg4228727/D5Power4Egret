@@ -80,8 +80,8 @@ module d5power {
         private _link_map:number;
         private _link_posx:number;
         private _link_posy:number;
-        private _camp:number;
-        private _hp:number;
+        private _camp:number = 0;
+        private _hp:number = 0;
         private _maxHp:number;
         private _sp:number;
         private _maxSp:number;
@@ -89,6 +89,8 @@ module d5power {
         private _monsterid:number;
         private _ai:BTTree;
         private _fighter:IFighter;
+
+        private _isDB:number = 0;
 
         /**
         * 是否处于重力状态
@@ -525,6 +527,15 @@ module d5power {
         public get monsterid():number
         {
             return this._monsterid;
+        }
+        public setIsDB(id:number):void
+        {
+            this._isDB = id;
+        }
+
+        public get isDB():number
+        {
+            return this._isDB;
         }
 
     }

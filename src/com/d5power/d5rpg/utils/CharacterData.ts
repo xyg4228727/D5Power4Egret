@@ -39,7 +39,6 @@ module d5power
         public _missionList:Array<MissionData>;
 
         public nickname:string;
-
         /**
          * 系统配置的起始任务ID
          */

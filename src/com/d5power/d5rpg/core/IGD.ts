@@ -173,5 +173,9 @@ module d5power
         speedX: number;
         
         speedY: number;
+
+        isDB:number;
+
+        setIsDB(value:number):void;
     }
 }

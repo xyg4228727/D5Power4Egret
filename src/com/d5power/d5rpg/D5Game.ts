@@ -707,7 +707,10 @@ module d5power {
             );
 
             if(data.gravity == "1") this.openGravity();
-            
+            if(data.music !="") 
+            {
+                RES.getResByUrl(D5Game.RES_SERVER + data.music, this.playMusic, this);
+            }
             if(data.far) {
                 for(var i: number = 0;i < data.far.length;i++) {
                     var far: any = data.far[i];
@@ -772,6 +775,24 @@ module d5power {
                 obj.setPos(door.posx,door.posy);
                 obj.setWork(GOData.WORK_DOOR);
                 this.addObject(obj);
+            }
+        }
+        private _sound: egret.Sound;
+        private playMusic(data:any):void
+        {
+            if(data)
+            {
+                this._sound = data;
+                this._sound.play(true);
+            }
+        }
+        
+        private stopMusic():void
+        {
+            if(this._sound)
+            {
+                this._sound.stop();
+                this._sound = null;
             }
         }
         
@@ -908,6 +929,7 @@ module d5power {
 
             this._player=null;
             this._camera.setFocus(null);
+            this.stopMusic();
         }
 
         private onResize(e:egret.Event):void {

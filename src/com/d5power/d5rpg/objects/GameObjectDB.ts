@@ -118,8 +118,9 @@ module d5power {
 
         public hitTestArea(px:number,py:number):boolean
         {
-            if(this._spriteSheet==null) return false;
-            return (px>=this.x+this._spriteSheet.gX && py>=this.y+this._spriteSheet.gY && px<this.x+this._spriteSheet.gX+this._spriteSheet.frameWidth && py<=this.y+this._spriteSheet.gY+this.spriteSheet.frameHeight);
+            if(this._armature==null) return false;
+            var point:egret.Point = D5Game.me.map.getScreenPostion(this._data.posX,this._data.posY);
+            return (px>=point.x-this._armature.display.width/2 && py>=point.y-this._armature.display.height && px<point.x+this._armature.display.width/2 && py<=point.y);
         }
 
 
@@ -292,6 +293,7 @@ module d5power {
             {
                 if(this._nameShower==null) this._nameShower=new egret.TextField();
                 this._nameShower.size = 12;
+                this._nameShower.textColor = RPGI.Global.userdata.camp==this._data.camp?0x99ff00 : 0xff0000;
                 this._nameShower.text = this._data.nickname;
                 this._nameShower.x = -(this._nameShower.width>>1);
                 //this._nameShower.y = -this._monitor.height-this._nameShower.height;

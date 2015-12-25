@@ -269,7 +269,7 @@ module d5power {
                 this._shadow.graphics.beginFill(0,0.2);
                 this._shadow.graphics.drawEllipse(0,0,this._spriteSheet.shadowX,this._spriteSheet.shadowY);
                 this._shadow.graphics.endFill();
-                if(!this.contains(this._shadow)) this.addChild(this._shadow);
+                //if(!this.contains(this._shadow)) this.addChild(this._shadow);
             }
 
             if(!this.contains(this._monitor)) this.addChild(this._monitor);
@@ -291,6 +291,7 @@ module d5power {
             {
                 if(this._nameShower==null) this._nameShower=new egret.TextField();
                 this._nameShower.size = 12;
+                this._nameShower.textColor = RPGI.Global.userdata.camp==this._data.camp?0x99ff00 : 0xff0000;
                 this._nameShower.text = this._data.nickname;
                 this._nameShower.x = -(this._nameShower.width>>1);
                 //this._nameShower.y = -this._monitor.height-this._nameShower.height;
