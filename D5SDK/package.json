@@ -1,0 +1,12 @@
+{
+	"name": "egret",
+	"version": "2.5.3",
+	"modules": [
+		{
+			"name": "d5sdk",
+			"description": "d5sdk",
+			"files": ["D5Power.ts","D5SpriteSheet.ts","IDisplayer.ts","ISpriteSheetWaiter.ts","IUserInfoContainer.ts","IUserInfoDisplayer.ts","UVData.ts"],
+			"root": "src"
+		}
+	]
+}
