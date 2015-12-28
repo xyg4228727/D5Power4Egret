@@ -274,8 +274,8 @@ module d5power {
             while(i<max)
             {
                 var n:number = step*i+angle;
-                gotoP.x = center.x-r*Math.cos(n);
-                gotoP.y = center.y-r*Math.sin(n);
+                gotoP.x = Math.round(center.x-r*Math.cos(n));
+                gotoP.y = Math.round(center.y-r*Math.sin(n));
                 if(this.PointCanMove(gotoP,from))
                 {
                     return gotoP;

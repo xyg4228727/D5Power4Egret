@@ -41,7 +41,8 @@ module d5power {
          * 游戏资源的保存目录
          */ 
         public static ASSET_PATH:string = 'resource/assets';
-        
+
+        private _effectList:Array<any>;
         private _dataList:Array<IGD>;
         protected _screenList:Array<IGD>;
         private _g: D5Gravity;
@@ -57,7 +58,7 @@ module d5power {
         
         public fightController:IFightController;
 
-        private _timer:number;
+        protected _timer:number;
         private _readyBack:Function;
         protected _map:IMap;
         protected _player:IGD;
@@ -128,7 +129,7 @@ module d5power {
 
             this._dataList = [];
             this._screenList = [];
-
+            this._effectList = [];
             this.addEventListener(egret.Event.ADDED_TO_STAGE, this.install, this);
             /**
              * 重力跳跃测试
@@ -275,6 +276,10 @@ module d5power {
         {
 
         }
+        public reLive():void
+        {
+
+        }
         public get timer():number
         {
             return this._timer;
@@ -298,6 +303,9 @@ module d5power {
 
         public get dataList():Array<IGD> {
             return this._dataList;
+        }
+        public get sceneList():Array<IGD> {
+            return this._screenList
         }
 
         public get player():IGD {
@@ -385,7 +393,7 @@ module d5power {
                 }
                 else
                 {
-                    data.setDisplayer(data.work == GOData.WORK_DOOR? DoorObject.getDoor() : GameObject.getInstance());
+                    data.setDisplayer(data.work == GOData.WORK_DOOR? DoorObject.getDoor() :data.isDB==1?GameObjectDB.getInstance(): GameObject.getInstance());
                 }
                 this._screenList.push(data);
                 this._container.addChild(<egret.DisplayObject><any>data.displayer);
@@ -508,12 +516,23 @@ module d5power {
 
 
             var length:number = data.npc.length;
-            for(var i:number = 0;i < length;i++){
+            for(var i:number = 0;i < length;i++) {
                 var npc:any = data.npc[i];
                 var npcData:NpcData = D5ConfigCenter.my.getNpcConf(npc.uid);
                 var obj:GOData = GOData.getInstance();
                 obj.setDirection(Direction.Down);
-                obj.setRespath(npcData? npcData.skin:D5Game.RES_SERVER+D5Game.ASSET_PATH+"/mapRes/"+npc.res);
+                if (npcData)
+                {
+                    obj.setIsDB(npcData.isDB);
+                    if (npcData.isDB == 1) {
+                        obj.setResStyle(npcData.skin);
+                    } else {
+                        obj.setRespath(npcData ? npcData.skin : D5Game.RES_SERVER + D5Game.ASSET_PATH + "/mapRes/" + npc.res);
+                    }
+                }else
+                {
+                    obj.setRespath(D5Game.RES_SERVER + D5Game.ASSET_PATH + "/mapRes/" + npc.res);
+                }
                 obj.setNickname(npc.name);
                 obj.setPos(npc.posx,npc.posy);
                 obj.setUid(npc.uid);
@@ -629,6 +648,12 @@ module d5power {
             this.removeEventListener(egret.Event.ENTER_FRAME, this._runAction, this);
         }
 
+        public createEffect():void
+        {
+            var effect:any;
+            this._effectList.push(effect);
+        }
+
         private run(e:egret.Event = null):void {
 
             this._timer = egret.getTimer();
@@ -701,11 +726,14 @@ module d5power {
             var i:number;
             for (i = this._screenList.length - 1; i >= 0; i--) this.remove4ScreenByIndex(i);
             for (i = this._dataList.length - 1; i >= 0; i--) this.removeObject(i);
-
-
+            this.clear();
             this._player=null;
             this._camera.setFocus(null);
             this.stopMusic();
+        }
+        public clear():void
+        {
+
         }
 
         private onResize(e:egret.Event):void {

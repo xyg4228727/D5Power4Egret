@@ -359,6 +359,10 @@ module d5power
         {
             return true;
         }
+        public learnSkill(id:number,up:number,needCost:boolean=false):boolean
+        {
+            return true;
+        }
 
         public getExp(num:number = 0):void{
         }

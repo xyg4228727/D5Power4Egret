@@ -90,8 +90,22 @@ module d5power
 
         removeAllBuff():void;
 
+        hp:number;
+
+        sp:number;
+
+        setHp(value:number):void;
+
+        setSp(value:number):void;
+
+        hasEqu(value:number);
+
+        delItem(id:number,num:number):boolean;
+
         giveBuff(id:number,doer:IFighter):void
 
         quiteFight():void;
+
+        $playEffectNow(eff_name:string):void;
     }
 }

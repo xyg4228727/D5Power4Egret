@@ -77,6 +77,23 @@ module d5power
                 this.parseData();
             }
         }
+        /**
+         * 获得等级配置
+         * @param	lv	等级
+         */
+        public  getLvData(lv:number):LvData
+        {
+            return this._userLvList[lv];
+        }
+
+        /**
+         * 最大等级
+         */
+        private _maxLv: number = 100;
+        public  get maxLv():number
+        {
+            return this._maxLv;
+        }
         public parseData():void
         {
             this.parseBaseItemList();
@@ -86,8 +103,28 @@ module d5power
             this.parseJobList();//职业相关
             this.parseMissionLib();//任务库相关
             this.parseMissionList();//章节树
-            //this.parseUserProList();//
+            this.parseBaseLvProList();//
             this._onComplate.apply(this._parent);
+        }
+        private parseBaseLvProList():void
+        {
+            var obj:any = RES.getRes("lv");
+            if(obj)
+            {
+                var arr:Array<any> = obj.lv;
+                var len:number = arr.length;
+                var data:any;
+                for(var i:number = 0;i < len;i++) {
+                    data = arr[i];
+                    var item:d5power.LvData = new d5power.LvData();
+                    item.formatObject(data);
+                    this._userLvList[item.lv] = item;
+                }
+                this.parseLvProList();
+            }
+        }
+        public parseLvProList():void
+        {
         }
         /**
          *任务库 解析
