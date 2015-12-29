@@ -92,6 +92,16 @@ module d5power {
             return D5Game._me;
         }
         
+        /**
+         * 打开特效系统
+         */
+        public static openEffectSystem():void
+        {
+            D5ConfigCenter.effectSwitch= true;
+            if(D5ConfigCenter.my==null) return;
+            D5ConfigCenter.my.loadEffect();
+        }
+        
         public runScript(url:string):void
         {
 
@@ -423,7 +433,6 @@ module d5power {
             this._startY = toy;
             this.enterMap(tomap);
         }
-
         /**
          * 创建NPC
          * @param    s            位图资源名
@@ -648,9 +657,11 @@ module d5power {
             this.removeEventListener(egret.Event.ENTER_FRAME, this._runAction, this);
         }
 
-        public createEffect():void
+        public createEffect(name:string,posx:number,posy:number,doer:IGD=null,target:IGD=null,skill:number=0):void
         {
-            var effect:any;
+            var data:EffectData = D5ConfigCenter.my.getEffectData(name);
+            if(data==null) return;
+            var effect:EffectMakcer = new EffectMakcer();
             this._effectList.push(effect);
         }
 

@@ -57,7 +57,7 @@ module d5power {
 
         private _scene:egret.DisplayObjectContainer;
         private isNumber:boolean;
-        protected  _shower:egret.Sprite;
+        protected  _shower:any;
         private  stayTime:number;
         private  xspeed:number;
         private  yspeed:number ;
@@ -85,7 +85,7 @@ module d5power {
             }
             else
             {
-                this._shower = new d5power.D5Text(name,0xff0000);
+                this._shower = new egret.TextField();
             }
             this.addChild(this._shower);
 

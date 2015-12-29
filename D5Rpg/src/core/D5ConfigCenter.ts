@@ -5,6 +5,11 @@ module d5power
 {
     export class D5ConfigCenter
     {
+        /**
+         * 是否开启特效系统
+         */
+        public static effectSwitch:boolean=false;
+        
         private _pickupTime:number = 5;
         public  get pickupTime():number
         {
@@ -26,6 +31,7 @@ module d5power
         protected _npcList:Object; //npc数据
         protected _jobList:Object;//职业配置数据
         protected _userProList: Object;//玩家属性配置
+        protected _effectList:any;
         /**
          * 任务库
          */
@@ -66,10 +72,30 @@ module d5power
             this._chapterList = new Object();
             this.loadConfigCenter();
         }
+        
+        public loadEffect():void
+        {
+            this._effectList = {};
+            RES.getResByUrl("resource/assets/data/effect.json",this.onEffectConfig,this);
+        }
+        
+        private onEffectConfig(data:any):void
+        {
+            for(var i:number=0;i<data.length;i++)
+            {
+                var c:EffectData = new EffectData();
+                c.format(data[i]);
+                trace("[D5ConfigCenter] add effect ",c.name);
+                this._effectList[c.name] = c;
+            }
+        }
+        
         private loadConfigCenter():void
         {
             RES.addEventListener(RES.ResourceEvent.GROUP_COMPLETE,this.onLoadComplete,this);
             RES.loadGroup("configcenter");
+            
+            if(D5ConfigCenter.effectSwitch) this.loadEffect();
         }
         private onLoadComplete(event:RES.ResourceEvent):void {
             if(event.groupName=="configcenter"){
@@ -142,6 +168,13 @@ module d5power
                 this._missionLib[mission.id] = mission;
             }
         }
+        
+        public getEffectData(name:string):EffectData
+        {
+            if(this._effectList==null) return null;
+            return this._effectList[name];
+        }
+        
         public getMissionData(id:number):d5power.MissionData
         {
             if(!this._missionLib.hasOwnProperty(id.toString()))
