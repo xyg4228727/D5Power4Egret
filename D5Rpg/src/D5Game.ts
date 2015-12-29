@@ -661,8 +661,8 @@ module d5power {
         {
             var data:EffectData = D5ConfigCenter.my.getEffectData(name);
             if(data==null) return;
-            var effect:EffectMakcer = new EffectMakcer();
-            this._effectList.push(effect);
+            //var effect:EffectMakcer = new EffectMakcer();
+            //this._effectList.push(effect);
         }
 
         private run(e:egret.Event = null):void {
