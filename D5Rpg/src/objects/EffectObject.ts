@@ -30,8 +30,12 @@ module d5power
 {
     export class EffectObject extends egret.DisplayObjectContainer implements ISpriteSheetWaiter
     {
-        public static MAX_POOL_NUM:number = 5;
+        public static MAX_POOL_NUM:number = 100;
         private static _pool_event:Array<EffectObject>=[];
+        
+        public owner:IGD;
+        public target:IGD;
+        public skillid:number;
 
         public static getInstance():EffectObject
         {
@@ -39,7 +43,9 @@ module d5power
             if(EffectObject._pool_event.length)
             {
                 obj = EffectObject._pool_event.pop();
+                trace("[EffectObject] 从资源池中获取，剩余对象",EffectObject._pool_event);
             }else{
+                trace("[EffectObject] 重新构建");
                 obj = new EffectObject();
                 obj._monitor = new egret.Bitmap();
             }
@@ -48,7 +54,9 @@ module d5power
 
         private static back2pool(obj:EffectObject):void
         {
+            
             if(EffectObject._pool_event.length<EffectObject.MAX_POOL_NUM && EffectObject._pool_event.indexOf(obj)==-1) EffectObject._pool_event.push(obj);
+            trace("[EffectObject] 归还对象池",EffectObject._pool_event.length);
         }
 
         public constructor(){
@@ -92,7 +100,12 @@ module d5power
             this._dir = dir;
             this._posx = posx;
             this._posy = posy;
+            this._liveStart = start;
             this._sonDeep = data.sonFrameDeep;
+            this._monitor.alpha = 1;
+            this._monitor.rotation = 0;
+            this._monitor.scaleX = this._monitor.scaleY = 1;
+            this.deleting = false;
             var res:string = this._impl.res;
             
             if(res.indexOf('.json')!=-1)
@@ -103,12 +116,9 @@ module d5power
             }
             else if(res.indexOf('.png')!=-1)
             {
-                this._res = res
-                this.onTextureComplete(<egret.Texture>RES.getRes(this._res));
+                this._res = res;
+                this.onTextureComplete(D5UIResourceData.getData(this._res).getResource(0));
             }
-            this._liveStart = start;
-            this._posx = posx;
-            this._posy = posy;
         }
         private onTextureComplete(data:egret.Texture):void
         {
@@ -219,24 +229,27 @@ module d5power
         private drawJson():void
         {
             if(egret.getTimer()-this._lastRender<this._spriteSheet.renderTime) return;
+            
+            this.draw();
+            
             this._lastRender = egret.getTimer();
             var direction:number = 0;
             this._monitor.texture = this._spriteSheet.getTexture(direction,this._playFrame);
             if(this._spriteSheet.uvList)
             {
-                this._monitor.x = this._spriteSheet.uvList[direction*this._spriteSheet.totalFrame+this._playFrame].offX;
-                this._monitor.y = this._spriteSheet.uvList[direction*this._spriteSheet.totalFrame+this._playFrame].offY;
+                this._monitor.x+= this._spriteSheet.uvList[direction*this._spriteSheet.totalFrame+this._playFrame].offX;
+                this._monitor.y+= this._spriteSheet.uvList[direction*this._spriteSheet.totalFrame+this._playFrame].offY;
             }
             else
             {
-                this._monitor.x = this._spriteSheet.gX;
-                this._monitor.y = this._spriteSheet.gY;
+                this._monitor.x+= this._spriteSheet.gX;
+                this._monitor.y+= this._spriteSheet.gY;
             }
 
             this._playFrame++;
             if(this._playFrame>=this._spriteSheet.totalFrame) this._playFrame=0;
             
-            this.draw();
+            
         }
         /**
          * @param	allPro	是否克隆全部属性
@@ -255,6 +268,9 @@ module d5power
         public dispose():void
         {
             this.deleting = true;
+            this.owner = null;
+            this.target = null;
+            this.skillid = 0;
             if(this._monitor && this._monitor.parent) this._monitor.parent.removeChild(this._monitor);
             EffectObject.back2pool(this);
         }

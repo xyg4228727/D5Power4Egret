@@ -23,14 +23,22 @@ module d5power
             var obj:EffectObject;
             obj = EffectObject.getInstance();
             
-            if(this._maker.target==null)
+            if(this._maker.owner==null)
             {
                 this._dir = 0;
+                this._posx = this._maker.posx;
+                this._posy = this._maker.posy;
             }else{
-                
+                this._dir = this._maker.owner.direction;
+                this._posx = this._maker.owner.posX;
+                this._posy = this._maker.owner.posY;
             }
             
 			obj.setup(t,this._impl,this._dir,this._posx,this._posy);
+			obj.owner = this._maker.owner;
+			obj.target = this._maker.target;
+			obj.skillid = this._maker.skillid;
+			
 			D5Game.me.addEffect(obj);
             return obj;
         }

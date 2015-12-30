@@ -87,6 +87,11 @@ module d5power {
             EffectMakcer._renderSpeed = 1000/v;
         }
         
+        public get owner():IGD
+        {
+            return this._owner;
+        }
+        
         public get target():IGD
         {
             return this._target;
@@ -126,15 +131,18 @@ module d5power {
             }
         }
         
-        private _lastTime:number = 0;
-        public render(t:number):void
+        private resetFream(t:number):void
         {
+            this.frame = 0;
             if(this.deleting || this._keep_time>0 && t-this._live>this._keep_time)
             {
                 this.deleting = true;
-                return;
             }
-            
+        }
+        
+        private _lastTime:number = 0;
+        public render(t:number):void
+        {
             if(this._loopFream==0)
             {
                 if(this._target.displayer && this._target.displayer.spriteSheet)
@@ -142,14 +150,12 @@ module d5power {
                     this.frame = this._target.displayer.playFream;
                 }else{
                     this.frame++;
-                    if(this.frame>this._data.loopFream) this.frame = 0;
+                    if(this.frame>this._data.loopFream) this.resetFream(t);
                 }
             }else{
                 this.frame++;
-                if(this.frame>this._loopFream) this.frame = 0;
+                if(this.frame>this._loopFream) this.resetFream(t);
             }
-            
-            
             
             for(var i:number=0,j:number=this._layers.length;i<j;i++)
 			{

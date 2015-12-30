@@ -174,6 +174,8 @@ module d5power
 
         setMaxHp(value:number):void;
         
+        setMaxSp(value:number):void;
+        
         inG: boolean;
         
         speedX: number;
