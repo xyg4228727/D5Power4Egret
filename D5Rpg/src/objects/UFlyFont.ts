@@ -76,7 +76,7 @@ module d5power {
         {
             if(this._shower)
             {
-                if(this._shower instanceof NumberBitmap)this._shower.removeChildren();
+                if(this._shower instanceof NumberBitmap) this._shower.removeChildren();
                 this._shower = null;
             }
             if(this.isNumber)

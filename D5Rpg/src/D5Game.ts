@@ -69,7 +69,7 @@ module d5power {
         private _screenW:number;
         private _screenH:number;
         private _lastZorder:number=0;
-
+ 
         protected _firstEnter:boolean = true;
 
         /**
@@ -700,7 +700,6 @@ module d5power {
         }
 
         private run(e:egret.Event = null):void {
-
             this._timer = egret.getTimer();
 
             this._map.render(false);
