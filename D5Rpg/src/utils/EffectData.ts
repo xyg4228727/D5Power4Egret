@@ -39,11 +39,16 @@ module d5power {
 		 */
         public name:string;
 		/**
+		 * 循环帧
+		 */
+		public loopFream:number;
+		/**
 		 * 特效的实现配置
 		 */
         public implements:Array<EffectImplement>;
 
         public constructor(){
+			this.loopFream = 20;
         }
         
 		/**

@@ -42,7 +42,8 @@ module d5power {
          */ 
         public static ASSET_PATH:string = 'resource/assets';
 
-        private _effectList:Array<any>;
+        private _effectList:Array<EffectObject>;
+        private _effectMackerList:Array<EffectMakcer>;
         private _dataList:Array<IGD>;
         protected _screenList:Array<IGD>;
         private _g: D5Gravity;
@@ -106,6 +107,7 @@ module d5power {
         {
 
         }
+        
 
         public constructor(mapid:number,startx:number,starty:number,onReady:Function = null) {
             super();
@@ -130,8 +132,8 @@ module d5power {
             this._touch_layer.touchEnabled=true;
 
 
-            this.addChild(this._container_map);
             this.addChild(this._container_far);
+            this.addChild(this._container_map);
             this.addChild(this._container_bottom);
             this.addChild(this._container);
             this.addChild(this._container_top);
@@ -140,6 +142,7 @@ module d5power {
             this._dataList = [];
             this._screenList = [];
             this._effectList = [];
+            this._effectMackerList = [];
             this.addEventListener(egret.Event.ADDED_TO_STAGE, this.install, this);
             /**
              * 重力跳跃测试
@@ -154,6 +157,16 @@ module d5power {
                         }
                     }
               )
+        }
+        
+        public get topLayer():Layer
+        {
+            return this._container_top;
+        }
+        
+        public get bottomLayer():Layer
+        {
+            return this._container_bottom;
         }
 
         public openGravity():void
@@ -336,6 +349,11 @@ module d5power {
         public setPlayer(data:IGD){
             this._player = data;
             this.add2Screen(data);
+        }
+        
+        public addEffect(v:EffectObject):void
+        {
+            this._effectList.push(v);
         }
 
         public addObject(data:IGD):void {
@@ -669,12 +687,16 @@ module d5power {
             this.removeEventListener(egret.Event.ENTER_FRAME, this._runAction, this);
         }
 
-        public createEffect(name:string,posx:number,posy:number,doer:IGD=null,target:IGD=null,skill:number=0):void
+        public createEffectMacker(name:string,keep:number=0,posx:number=0,posy:number=0,doer:IGD=null,target:IGD=null,skill:number=0):void
         {
             var data:EffectData = D5ConfigCenter.my.getEffectData(name);
-            if(data==null) return;
-            //var effect:EffectMakcer = new EffectMakcer();
-            //this._effectList.push(effect);
+            if(data==null)
+            {
+                trace("[D5Game] createEffectMacker: 未找到名为 "+name+" 的特效配置");
+                return;
+            }
+            var effect:d5power.EffectMakcer = new d5power.EffectMakcer(data,keep,posx,posy,doer,target,skill);
+            this._effectMackerList.push(effect);
         }
 
         private run(e:egret.Event = null):void {
@@ -691,7 +713,26 @@ module d5power {
             {
                 if(this._screenList[i].deleting || !this._screenList[i].inScreen) this._screenList.splice(i,1);
             }
-
+            
+            for(i=this._effectMackerList.length-1;i>=0;i--)
+            {
+                if(this._effectMackerList[i].deleting)
+                {
+                    this._effectMackerList.splice(i,1);
+                }else{
+                    this._effectMackerList[i].render(this._timer);
+                }
+            }
+            
+            for(i=this._effectList.length-1;i>=0;i--)
+            {
+                if(this._effectList[i].deleting)
+                {
+                    this._effectList.splice(i,1);
+                }else{
+                    this._effectList[i].render();
+                }
+            }
 
             var needOrder:Boolean = this._timer - this._lastZorder > this._camera.zorderSpeed;
 

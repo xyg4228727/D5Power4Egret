@@ -146,6 +146,11 @@ module d5power {
         public get camp():number {
             return this._camp;
         }
+        
+        public get playFream():number
+        {
+            return this._playFrame;
+        }
 
         public hitTestArea(px:number,py:number):boolean
         {

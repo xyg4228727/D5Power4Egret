@@ -33,7 +33,7 @@ module d5power
         public static MAX_POOL_NUM:number = 5;
         private static _pool_event:Array<EffectObject>=[];
 
-        public static getObject():EffectObject
+        public static getInstance():EffectObject
         {
             var obj:EffectObject;
             if(EffectObject._pool_event.length)
@@ -41,11 +41,12 @@ module d5power
                 obj = EffectObject._pool_event.pop();
             }else{
                 obj = new EffectObject();
+                obj._monitor = new egret.Bitmap();
             }
             return obj;
         }
 
-        private static backEffect(obj:EffectObject):void
+        private static back2pool(obj:EffectObject):void
         {
             if(EffectObject._pool_event.length<EffectObject.MAX_POOL_NUM && EffectObject._pool_event.indexOf(obj)==-1) EffectObject._pool_event.push(obj);
         }
@@ -57,8 +58,15 @@ module d5power
         {
             return this._loadID;
         }
+        
+        public updateRayCopy(deep:number,angle:number):void
+		{
+			this._moveAngle+=angle*deep;
+			this._sonAngle+=angle*deep;
+		}
+        
         private _lastRender:number;
-        private _data:EffectImplementData;
+        private _impl:EffectImplement;
         private _playFrame:number=0;
         private _totalframe:number;
         public _spriteSheet:IDisplayer;
@@ -68,10 +76,25 @@ module d5power
         private _res:string;
         protected _drawAction:Function;
         private _liveStart:number = 0;
-        public setup(data:EffectImplementData):void
+        private _moveAngle:number;
+        private _sonAngle:number;
+        private _posx:number;
+        private _posy:number;
+        private _dir:number;
+        private _sonDeep:number;
+        public deleting:boolean=false;
+        
+        public setup(start:number,data:EffectImplement,dir:number,posx:number,posy:number):void
         {
-            this._data = data;
-            var res:string = this._data.res;
+            this._impl = data;
+            this._moveAngle = data.getMoveAngle(dir);
+            this._sonAngle = data.getSonAngle(dir);
+            this._dir = dir;
+            this._posx = posx;
+            this._posy = posy;
+            this._sonDeep = data.sonFrameDeep;
+            var res:string = this._impl.res;
+            
             if(res.indexOf('.json')!=-1)
             {
                 this._res = res.substr(0,res.length-5);
@@ -81,31 +104,55 @@ module d5power
             else if(res.indexOf('.png')!=-1)
             {
                 this._res = res
-                RES.getResByUrl(this._res, this.onTextureComplete, this);
+                this.onTextureComplete(<egret.Texture>RES.getRes(this._res));
             }
-            this._liveStart = egret.getTimer();
+            this._liveStart = start;
+            this._posx = posx;
+            this._posy = posy;
         }
         private onTextureComplete(data:egret.Texture):void
         {
-            this._monitor = new egret.Bitmap(data);
+            this._monitor.texture = data;
             this._totalframe = 5;
             this._drawAction = this.draw;
-            if(!this.contains(this._monitor)) this.addChild(this._monitor);
+            this.runPos();
+            this._impl.lowLv ? D5Game.me.bottomLayer.addChild(this._monitor) : D5Game.me.topLayer.addChild(this._monitor);
         }
 
         public onSpriteSheepReady(data:IDisplayer):void
         {
             if (this._spriteSheet) this._spriteSheet.unlink();
+            if(data == null) return;
             this._spriteSheet = data;
             this._totalframe = this._spriteSheet.totalFrame;
             this._drawAction = this.drawJson;
-            if(!this.contains(this._monitor)) this.addChild(this._monitor);
+            this.runPos();
+            this._impl.lowLv ? D5Game.me.bottomLayer.addChild(this._monitor) : D5Game.me.topLayer.addChild(this._monitor);
         }
 
-
+        private runPos():void
+        {
+            var target:egret.Point = D5Game.me.map.getScreenPostion(this._posx,this._posy);
+            if(this._monitor)
+            {
+                this._monitor.x = target.x;
+                this._monitor.y = target.y;
+                
+                if(this._spriteSheet)
+                {
+                    this._monitor.x+=this._spriteSheet.gX;
+                    this._monitor.y+=this._spriteSheet.gY;
+                }else{
+                    this._monitor.x-=this._monitor.width>>1;
+                    this._monitor.y-=this._monitor.height>>1;
+                }
+            }
+            
+            
+        }
+        
         private _lastCheck:number;
-        private _effectImplData:EffectImplementData;
-        public renderAction():void
+        public render():void
         {
             this._drawAction!=null ? this._drawAction() : 0;
         }
@@ -113,20 +160,29 @@ module d5power
         {
             var t:number = egret.getTimer();
 
-            if(this._data.live>0 && t-this._liveStart>this._data.live)
+            if(this._impl.live>0 && t-this._liveStart>this._impl.live)
             {
                 this.dispose();
                 return;
             }
 
 
-            var cost_time:number = (t - this._liveStart) /this._data.playSpeed;
+            var cost_time:number = (t - this._liveStart) /this._impl.playSpeed;
             if (this._playFrame != cost_time)
             {
                 this._playFrame = cost_time;
-                if(this._data.alphaSpeed!=0)
+                
+                if(this._impl.moveSpeed!=0)
                 {
-                    this._monitor.alpha+=this._data.alphaSpeed;
+                   this._posx+=Math.cos(this._moveAngle)*this._impl.moveSpeed;
+                   this._posy+=Math.sin(this._moveAngle)*this._impl.moveSpeed;
+                }
+                
+                this.runPos();
+                
+                if(this._impl.alphaSpeed!=0)
+                {
+                    this._monitor.alpha+=this._impl.alphaSpeed;
                     if(this._monitor.alpha<=0)
                     {
                         this.dispose();
@@ -134,34 +190,25 @@ module d5power
                     }
                 }
 
-                if(this._data.zoomSpeed!=0)
+                if(this._impl.zoomSpeed!=0)
                 {
-                    this._monitor.scaleX+=this._data.zoomSpeed;
-                    this._monitor.scaleY+=this._data.zoomSpeed;
+                    this._monitor.scaleX+=this._impl.zoomSpeed;
+                    this._monitor.scaleY+=this._impl.zoomSpeed;
                 }
 
-                if(this._data.rotationSpeed!=0)
+                if(this._impl.rotationSpeed!=0)
                 {
-                    this.rotation+=this._data.rotationSpeed;
+                    this.rotation+=this._impl.rotationSpeed;
                 }
-
-                //if(this._data.moveSpeed!=0)
-                //{
-                //    this._monitor.x+=Math.cos(this._data.moveAngle)*this._data.moveSpeed;
-                //    this._monitor.y+=Math.sin(this._data.moveAngle)*this._data.moveSpeed;
-                //
-                //    _bmpPos2.x = this._monitor.x;
-                //    _bmpPos2.y = this._monitor.y;
-                //}
-                //
-                //if(this._playFrame==this._data.sonFrame && this._data.sonFrameDeep>0)
-                //{
-                //    var obj:EffectObject = this.clone(true);
-                //    obj._sonDeep = --_sonDeep;
-                //    obj.x = this.x+this._data.sonSpeed*Math.cos(this._data.sonAngle);
-                //    obj.y = this.y+this._data.sonSpeed*Math.sin(_sonAngle);
-                //    obj.openAutoRender();
-                //}
+                
+                if(this._playFrame==this._impl.sonFrame && this._sonDeep>0)
+                {
+                   var obj:EffectObject = this.clone(true);
+                   obj._sonDeep = --this._sonDeep;
+                   obj._posx = this._posx+this._impl.sonSpeed*Math.cos(this._sonAngle);
+                   obj._posy = this._posy+this._impl.sonSpeed*Math.sin(this._sonAngle);
+                   D5Game.me.addEffect(obj);
+                }
 
                 if(this._playFrame==this._totalframe-1 && this._totalframe>0)
                 {
@@ -188,24 +235,28 @@ module d5power
 
             this._playFrame++;
             if(this._playFrame>=this._spriteSheet.totalFrame) this._playFrame=0;
+            
+            this.draw();
         }
         /**
          * @param	allPro	是否克隆全部属性
          */
         public clone(allPro:boolean=false):EffectObject
         {
-            var p:EffectObject = EffectObject.getObject();
-            p.x = this.x;
-            p.y = this.y;
-
-            p.setup(this._data);
+            var p:EffectObject = EffectObject.getInstance();
+            p.setup(D5Game.me.timer,this._impl,this._dir,this._posx,this._posy);
+            p._moveAngle = this._moveAngle;
+            p._sonAngle = this._sonAngle;
+            p._posx = this._posx;
+            p._posy = this._posy;
             return p;
         }
 
         public dispose():void
         {
-
-            EffectObject.backEffect(this);
+            this.deleting = true;
+            if(this._monitor && this._monitor.parent) this._monitor.parent.removeChild(this._monitor);
+            EffectObject.back2pool(this);
         }
     }
 }
