@@ -357,6 +357,7 @@ module d5power {
             for(i=0,j=this._screenList.length;i<j;i++)
             {
                 igd = this._screenList[i];
+                if(igd.work==GOData.WORK_NORMAL)continue;
                 if(igd.work!=GOData.WORK_DOOR && igd!=this._player && igd.displayer.hitTestArea(px,py)) testList.push(igd);
             }
 
@@ -561,6 +562,17 @@ module d5power {
                 obj.setPos(door.posx,door.posy);
                 obj.setWork(GOData.WORK_DOOR);
                 this.addObject(obj);
+            }
+            if(data.movie)
+            {
+                for(var i:number = 0;i < data.movie.length;i++){
+                    var movie:any = data.movie[i];
+                    var obj:GOData = GOData.getInstance();
+                    obj.setDirection(Direction.Down);
+                    obj.setRespath(D5Game.RES_SERVER+D5Game.ASSET_PATH+"/mapRes/"+movie.res);
+                    obj.setPos(movie.posx,movie.posy);
+                    this.addObject(obj);
+                }
             }
             if(data.event)
             {

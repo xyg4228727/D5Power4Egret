@@ -37,7 +37,7 @@ module d5power {
 		/**
 		 * 主素材资源
 		 */ 
-		public res:String;
+		public res:string;
 		/**
 		 * 不同方向的坐标配置
 		 */ 

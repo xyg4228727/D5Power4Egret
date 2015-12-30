@@ -138,7 +138,7 @@ module d5power {
                 this.numShower = new D5Text('0',0xd4cc75);
                 this.numShower.setFontBorder(0x000000);
                 this.numShower.setTextAlign(D5Text.RIGHT);
-                this.numShower.setSize(20,18);
+                this.numShower.setSize(50,18);
             }
             this.numShower.x = this._w - this.numShower.width;
             this.numShower.y = this._h - this.numShower.height;

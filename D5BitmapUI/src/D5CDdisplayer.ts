@@ -122,7 +122,6 @@ module d5power {
                 this.removeEventListener(egret.Event.ENTER_FRAME,this.render,this);
                 this._cding = false;
                 this.graphics.clear();
-                trace("Ended");
                 return;
             }
             this._progressLen = checker*360 / this._cd;
@@ -153,7 +152,6 @@ module d5power {
                 this.removeEventListener(egret.Event.ENTER_FRAME,this.render,this);
                 this._cding = false;
                 this.graphics.clear();
-                trace("Ended");
                 return;
             }
             this._progressLen = this._progressMax*(checker/this._cd);
