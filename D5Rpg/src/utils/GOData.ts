@@ -406,14 +406,12 @@ module d5power {
             if(this._displayer!=null && data==null)
             {
                 this._displayer.dispose();
-                if(this.ai)this.ai.isRunning = false;
             }
             this._displayer = data;
 
             if(this._displayer)
             {
                 this._displayer.setupData(this);
-                if(this.ai)this.ai.isRunning = true;
                 if(this.respath!=null && this.respath!='')
                 {
                     this._displayer.setupSkin(this.respath);

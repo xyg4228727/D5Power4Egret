@@ -2,3 +2,4 @@
 *.d.ts
 D5Rpg/.vscode/settings.json
 wingProperties.json
+*.bat

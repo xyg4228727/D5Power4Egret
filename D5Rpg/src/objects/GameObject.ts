@@ -107,7 +107,7 @@ module d5power {
 
         protected _missionIcon:egret.Bitmap;
 
-        protected _shadow:egret.Shape;
+        protected _shadow:egret.Bitmap;
 
         private _lastRender:number;
 
@@ -200,7 +200,11 @@ module d5power {
 
 
             if(this.contains(this._monitor)) this.removeChild(this._monitor);
-            if(this._shadow) this._shadow.graphics.clear();
+            if(this._shadow)
+            {
+                this._shadow.texture=null;
+                if(this.contains(this._shadow)) this.removeChild(this._shadow);
+            }
             if(this._hpBar && this.contains(this._hpBar))this.removeChild(this._hpBar);
             if(this._spBar && this.contains(this._spBar))this.removeChild(this._spBar);
             this._hpBar = null;
@@ -274,21 +278,30 @@ module d5power {
             this._drawAction = this.draw;
             //console.log("[GameObject] Res is ready");
             this._spriteSheet = data;
-            if(this._spriteSheet.shadowX!=0 && this._spriteSheet.shadowY!=0)
+//            if(this._spriteSheet.shadowX!=0 && this._spriteSheet.shadowY!=0)
+//            {
+//                if(this._shadow==null)
+//                {
+//                    this._shadow = new egret.Shape();
+//                }else{
+//                    this._shadow.graphics.clear();
+//                }
+//                this._shadow.graphics.lineStyle();
+//                this._shadow.graphics.beginFill(0,0.2);
+//                this._shadow.graphics.drawEllipse(0,0,this._spriteSheet.shadowX,this._spriteSheet.shadowY);
+//                this._shadow.graphics.endFill();
+//                //if(!this.contains(this._shadow)) this.addChild(this._shadow);
+//            }
+            if(this._shadow==null)
             {
-                if(this._shadow==null)
-                {
-                    this._shadow = new egret.Shape();
-                }else{
-                    this._shadow.graphics.clear();
-                }
-                this._shadow.graphics.lineStyle();
-                this._shadow.graphics.beginFill(0,0.2);
-                this._shadow.graphics.drawEllipse(0,0,this._spriteSheet.shadowX,this._spriteSheet.shadowY);
-                this._shadow.graphics.endFill();
-                //if(!this.contains(this._shadow)) this.addChild(this._shadow);
+                this._shadow = new egret.Bitmap(RES.getRes('shadowIcon'));
+                this._shadow.x = -(this._shadow.width>>1);
+                this._shadow.y = -(this._shadow.height>>1);
+                
+            }else{
+                this._shadow.texture = RES.getRes('shadowIcon');
             }
-
+            if(!this.contains(this._shadow)) this.addChild(this._shadow);
             if(!this.contains(this._monitor)) this.addChild(this._monitor);
  
             this.showMissionIcon();

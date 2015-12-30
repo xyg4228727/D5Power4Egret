@@ -74,7 +74,7 @@ module d5power {
 
         protected _missionIcon:egret.Bitmap;
 
-        protected _shadow:egret.Shape;
+        protected _shadow:egret.Bitmap;
 
         private _lastRender:number;
 
@@ -159,6 +159,16 @@ module d5power {
         private onTextureComplete(data:egret.Texture):void
         {
             this._texture = data;
+            if(this._shadow==null)
+            {
+                this._shadow = new egret.Bitmap(RES.getRes('shadowIcon'));
+                this._shadow.x = -(this._shadow.width>>1);
+                this._shadow.y = -(this._shadow.height>>1);
+            }
+            else{
+                this._shadow.texture = RES.getRes('shadowIcon');
+            }
+            if(!this.contains(this._shadow)) this.addChild(this._shadow);          
             this.createDB();
         }
         private createDB():void
@@ -217,9 +227,12 @@ module d5power {
                 this._nameShower.text='';
                 this.removeChild(this._nameShower);
             }
+            if(this._shadow)
+            {
+                this._shadow.texture=null;
+                if(this.contains(this._shadow)) this.removeChild(this._shadow);
+            }
 
-
-            if(this._shadow) this._shadow.graphics.clear();
             if(this._hpBar && this.contains(this._hpBar))this.removeChild(this._hpBar);
             if(this._spBar && this.contains(this._spBar))this.removeChild(this._spBar);
             this._hpBar = null;
