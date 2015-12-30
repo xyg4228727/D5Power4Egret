@@ -28,13 +28,85 @@
 //////////////////////////////////////////////////////////////////////////////////////
 module d5power {
     export class EffectMakcer {
+        /**
+         * 渲染速度
+         */
+        private static _renderSpeed:number=120;
+        
+        /**
+         * 特效数据
+         */
         private _data:EffectData;
+        /**
+         * 特效发起人
+         */
         private _owner:IGD;
+        /**
+         * 特效目标
+         */
         private _target:IGD;
+        /**
+         * 特效保持时间，0为自动
+         */
         private _keep_time:number;
+        /**
+         * 虚拟帧
+         */
         private frame:number = 0;
+        /**
+         * 特效产生坐标，若为0，则使用发起人当前坐标
+         */
         private _posx:number;
+        /**
+         * 特效产生坐标，若为0，则使用发起人当前坐标
+         */
         private _posy:number;
+        /**
+         * 特效产生时的系统时间戳
+         */
+        private _live:number;
+        /**
+         * 是否删除
+         */
+        public deleting:boolean;
+        /**
+         * 循环帧
+         */
+        private _loopFream:number;
+        /**
+         * 技能id
+         */
+        private _skill:number;
+        
+        private _layers:Array<EffectLayer>;
+        
+        public static setRenderFPS(v:number)
+        {
+            v = v>60 ? 60 : v;
+            v = v<1 ? 1 : v;
+            EffectMakcer._renderSpeed = 1000/v;
+        }
+        
+        public get target():IGD
+        {
+            return this._target;
+        }
+        
+        public get posx():number
+        {
+            return this._posx;
+        }
+        
+        public get posy():number
+        {
+            return this._posy;
+        }
+        
+        public get skillid():number
+        {
+            return this._skill;
+        }
+        
         public constructor(data:EffectData,keep:number = 0,posx:number=0,posy:number=0,doer:IGD=null,target:IGD=null,skill:number=0){
             this._owner = doer;
             this._target = target;
@@ -42,33 +114,47 @@ module d5power {
             this._posx = posx;
             this._posy = posy;
             this._keep_time = keep;
+            this._live = d5power.D5Game.me.timer;
+            this._loopFream = target==null ? data.loopFream : 0;
+            this._layers = [];
+            this._skill = skill;
+            
+            for(var i:number=0,j:number=data.implements.length;i<j;i++)
+            {
+                var layer:EffectLayer = new EffectLayer(data.implements[i],this);
+                this._layers.push(layer);
+            }
         }
         
         private _lastTime:number = 0;
-        public render():void
+        public render(t:number):void
         {
-            var impl:EffectImplement;
-            var obj:EffectObject;
-            if(D5Game.me.timer-this._lastTime>120)
+            if(this.deleting || this._keep_time>0 && t-this._live>this._keep_time)
             {
-                for(var i:number = 0;i<this._data.implements.length;i++)
-                {
-                    impl = this._data.implements[i];
-                    if(this.frame==impl.startFrame)
-                    {
-                        if(impl.sonAngleAdd>0)
-                        {
-
-                        }
-                        else
-                        {
-                            obj = EffectObject.getObject();
-                            obj.setup(impl);
-                        }
-                    }
-                }
-                this.frame++;
+                this.deleting = true;
+                return;
             }
+            
+            if(this._loopFream==0)
+            {
+                if(this._target.displayer && this._target.displayer.spriteSheet)
+                {
+                    this.frame = this._target.displayer.playFream;
+                }else{
+                    this.frame++;
+                    if(this.frame>this._data.loopFream) this.frame = 0;
+                }
+            }else{
+                this.frame++;
+                if(this.frame>this._loopFream) this.frame = 0;
+            }
+            
+            
+            
+            for(var i:number=0,j:number=this._layers.length;i<j;i++)
+			{
+				this._layers[i].render(this.frame,t);
+			}
         }
     }
 }

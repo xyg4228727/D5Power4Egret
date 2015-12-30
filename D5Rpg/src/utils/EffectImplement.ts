@@ -30,6 +30,10 @@
 module d5power {
 	export class EffectImplement
 	{
+        public static TYPE_FREAM:number = 0;
+        public static TYPE_IMG:number = 1;
+        
+        public type:number;
 		/**
 		 * 播放起始帧
 		 */ 
@@ -37,7 +41,7 @@ module d5power {
 		/**
 		 * 主素材资源
 		 */ 
-		public res:String;
+		public res:string;
 		/**
 		 * 不同方向的坐标配置
 		 */ 
@@ -211,7 +215,8 @@ module d5power {
 		public format(xml:any):void
 		{
 			this.startFrame = xml.startFrame;
-			this.res = String(xml.res).replace(/\\/g,"/");
+			this.res = <string>(xml.res).replace(/\\/g,"/");
+            this.type = this.res.substr(this.res.lastIndexOf('.'))=='.json' ? EffectImplement.TYPE_FREAM : EffectImplement.TYPE_IMG;
 			this.playSpeed = xml.playSpeed;
 			this.rotationSpeed = xml.rotationSpeed;
 			this.sonSpeed = xml.sonSpeed;
@@ -256,5 +261,17 @@ module d5power {
 				this._mirrorMaps[parseInt(dir.direction)] = parseInt(dir.mirror);
 			}
 		}
+        
+        public getMoveAngle(dir:number):number
+        {
+            if(this._moveAngleMaps==null || this._moveAngleMaps[dir]==null) return 0;
+            return this._moveAngleMaps[dir];
+        }
+        
+        public getSonAngle(dir:number):number
+        {
+            if(this._sonAngleMaps==null || this._sonAngleMaps[dir]==null) return 0;
+            return this._sonAngleMaps[dir];
+        }
 	}
 }
