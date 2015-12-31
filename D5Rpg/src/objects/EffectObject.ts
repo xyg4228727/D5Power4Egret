@@ -43,9 +43,7 @@ module d5power
             if(EffectObject._pool_event.length)
             {
                 obj = EffectObject._pool_event.pop();
-                trace("[EffectObject] 从资源池中获取，剩余对象",EffectObject._pool_event);
             }else{
-                trace("[EffectObject] 重新构建");
                 obj = new EffectObject();
                 obj._monitor = new egret.Bitmap();
             }
@@ -54,9 +52,7 @@ module d5power
 
         private static back2pool(obj:EffectObject):void
         {
-            
             if(EffectObject._pool_event.length<EffectObject.MAX_POOL_NUM && EffectObject._pool_event.indexOf(obj)==-1) EffectObject._pool_event.push(obj);
-            trace("[EffectObject] 归还对象池",EffectObject._pool_event.length);
         }
 
         public constructor(){
@@ -91,6 +87,8 @@ module d5power
         private _dir:number;
         private _sonDeep:number;
         public deleting:boolean=false;
+        private _offX:number;
+        private _offY:number;
         
         public setup(start:number,data:EffectImplement,dir:number,posx:number,posy:number):void
         {
@@ -107,6 +105,13 @@ module d5power
             this._monitor.scaleX = this._monitor.scaleY = 1;
             this.deleting = false;
             var res:string = this._impl.res;
+            
+            var p:Array<any> = data.getDirectionPos(dir);
+            this._offX = p[0];
+            this._offY = p[1];
+            
+            this._posx+=this._offX;
+            this._posy+=this._offY;
             
             if(res.indexOf('.json')!=-1)
             {

@@ -249,7 +249,14 @@ module d5power {
 			this.zoom_high = Number(xml.zoom_high);
 			this.alpha_low = Number(xml.alpha_low);
 			this.alpha_high = Number(xml.alpha_high);
-
+            
+            this._directionPos = [];
+			this._directionMaps = [];
+			this._moveAngleMaps = [];
+			this._sonAngleMaps = [];
+			this._mirrorMaps = [];
+			this._rotationMaps = [];
+            
 			for(var i:number=0,j:number=xml.directionMap.length;i<j;i++)
 			{
 				var dir:any = xml.directionMap[i];
@@ -272,6 +279,30 @@ module d5power {
         {
             if(this._sonAngleMaps==null || this._sonAngleMaps[dir]==null) return 0;
             return this._sonAngleMaps[dir];
+        }
+        
+        public getRotation(dir:number):number
+		{
+			if(this._rotationMaps[dir]==null) return 0;
+			return this._rotationMaps[dir];
+		}
+		
+		public getDirectionPos(dir:number):Array<any>
+		{
+			if(this._directionPos[dir]==null) return [0,0];
+			return this._directionPos[dir];
+		}
+        
+        public getDirectionMap(dir:number):number
+        {
+            if(this._directionMaps[dir]==null) return 0;
+            return this._directionMaps[0];
+        }
+        
+        public getDirectionMirror(dir:number):number
+        {
+            if(this._mirrorMaps[dir]==null) return 0;
+            return this._mirrorMaps[dir];
         }
 	}
 }

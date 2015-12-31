@@ -324,6 +324,7 @@ module d5power {
                 this._nameShower.textColor = D5Game.me.characterData.camp==this._data.camp?0x99ff00 : 0xff0000;
                 this._nameShower.text = this._data.nickname;
                 this._nameShower.x = -(this._nameShower.width>>1);
+                this._nameShower.cacheAsBitmap = true;
                 //this._nameShower.y = -this._monitor.height-this._nameShower.height;
                 this.addChild(this._nameShower);
             }
