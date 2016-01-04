@@ -182,10 +182,10 @@ module d5power
             }
 
 
-            var cost_time:number = (t - this._liveStart) /this._impl.playSpeed;
+            var cost_time:number = (t - this._liveStart) / this._impl.playSpeed;
             if (this._playFrame != cost_time)
             {
-                this._playFrame = cost_time;
+                this._playFrame = Math.floor(cost_time % this._totalframe);
                 
                 if(this._impl.moveSpeed!=0)
                 {
@@ -242,8 +242,9 @@ module d5power
             this._monitor.texture = this._spriteSheet.getTexture(direction,this._playFrame);
             if(this._spriteSheet.uvList)
             {
-                this._monitor.x+= this._spriteSheet.uvList[direction*this._spriteSheet.totalFrame+this._playFrame].offX;
-                this._monitor.y+= this._spriteSheet.uvList[direction*this._spriteSheet.totalFrame+this._playFrame].offY;
+                var f: number = direction * this._spriteSheet.totalFrame + this._playFrame;
+                this._monitor.x+= this._spriteSheet.uvList[f].offX;
+                this._monitor.y+= this._spriteSheet.uvList[f].offY;
             }
             else
             {

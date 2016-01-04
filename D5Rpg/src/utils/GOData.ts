@@ -152,8 +152,8 @@ module d5power {
                 for(var i:number = 0;i<num;i++)
                 {
                     m = D5Game.me.characterData.getMissionByIndex(i).missionData;
-                    if(m.mapId>0 && m.mapId!= D5Game.me.map.id)continue;
-                    if((m.type==0 &&m.npc_startId == this._uid)||(m.type>0&&m.talkNpcFlag&&m.talkNpcArr.indexOf(this._uid)!=-1) ||(m.type>0&&m.npc_CompleteId == this._uid))
+//                    if(m.mapId>0 && m.mapId!= D5Game.me.map.id)continue;
+                    if((m.type==0 &&m.npc_startId == this._uid&&(m.mapId==0||m.mapId== D5Game.me.map.id))||(m.type>0&&m.talkNpcFlag&&m.talkNpcArr.indexOf(this._uid)!=-1) ||(m.type>0&&m.npc_CompleteId == this._uid))
                     {
 
                         if(this._missionIndex==-1) this._missionIndex = i;

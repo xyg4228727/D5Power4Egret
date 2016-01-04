@@ -93,6 +93,8 @@ module d5power
         hp:number;
 
         sp:number;
+        
+        getIGD:d5power.IGD;
 
         setHp(value:number):void;
 
