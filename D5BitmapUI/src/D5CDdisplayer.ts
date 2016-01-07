@@ -33,12 +33,15 @@ module d5power {
 	 *
 	 */
 	export class D5CDdisplayer extends d5power.D5Component{
+    	
+    	public static CIRCLE:number = 0;
+    	public static RECT:number = 1;
 		public constructor() {
             super();
             this.alpha = 0.8;
             this.setSize(60,60);
 		}
-        
+        private  _mode:number = 0;
         private  _cd:number;
         private  _cding:boolean;
         private  _startX:number;
@@ -53,6 +56,11 @@ module d5power {
         private  _color:number = 0;
         //private  _alpha:number = 0.5;
         private  _drawPath:Array<any>;
+        
+        public setMode(v:number):void
+        {
+            this._mode = v;
+        }
        
         public  setColor(v:number):void
         {
@@ -110,7 +118,18 @@ module d5power {
             this.graphics.clear();
             this.graphics.beginFill(this._color,this.alpha);
             this.graphics.drawRect(0,0,this.width,this.height);
-            this.addEventListener(egret.Event.ENTER_FRAME,this.renderCircle,this);
+            this.addEventListener(egret.Event.ENTER_FRAME,this.render,this);
+        }
+        private render(e: Event = null): void
+        {
+            if(this._mode == D5CDdisplayer.CIRCLE)
+            {
+                this.renderCircle();
+            }
+            else 
+            {
+                this.renderRect();
+            }
         }
         private renderCircle(e: Event = null): void
         {
@@ -141,7 +160,7 @@ module d5power {
             this._lastRender = t;
         }
         
-        private  render(e:Event=null):void
+        private  renderRect(e:Event=null):void
         {
             var t:number = egret.getTimer();
             var checker:number = t-this._lastRender;
@@ -157,6 +176,12 @@ module d5power {
             this._progressLen = this._progressMax*(checker/this._cd);
             
             this.graphics.clear();
+            if(this._color == 0xffffff)
+            {
+                this.graphics.beginFill(0x000000,0.1);
+			    this.graphics.drawRect(0,0,60,60);
+			    this.graphics.endFill();
+            }
             this.graphics.beginFill(this._color,this.alpha);
             this.graphics.moveTo(this._startX,this._startY);
             

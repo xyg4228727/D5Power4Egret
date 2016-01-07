@@ -161,6 +161,7 @@ module d5power
             this._waitDispathTimer.reset();
             this._waitDispathTimer.stop();
             trace("延迟更新完成。");
+            this.changeHP();
             if(this._uiList.length>0)
             {
                 for(var i:number=0,j:number=this._uiList.length;i<j;i++)
@@ -173,8 +174,10 @@ module d5power
             this.checkActiveMission();
             //D5Game.me.setCharacterData(RPGI.Global.userdata);
         }
-
-
+        public changeHP():void
+        {
+            
+        }
         public get missionNum():number
         {
             return this._missionList.length;
